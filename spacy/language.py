@@ -202,9 +202,10 @@ class Language(object):
                     return path.join(self.root, *path_parts)
 
                 def load_utf8(self, func, *path_parts, **kwargs):
-                    with io.open(self.file_path(path.join(*path_parts)),
-                                 mode='r', encoding='utf8') as f:
-                        return func(f)
+                    if self.has_file(*path_parts): 
+                        with io.open(self.file_path(path.join(*path_parts)),
+                                     mode='r', encoding='utf8') as f:
+                            return func(f)
 
             warn("using non-package data_dir", DeprecationWarning)
             package = Package(data_dir)
