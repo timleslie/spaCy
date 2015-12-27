@@ -16,7 +16,7 @@ from .lexeme cimport EMPTY_LEXEME
 from .lexeme cimport Lexeme
 from .strings cimport hash_string
 from .orth cimport word_shape
-from .typedefs cimport attr_t
+from .typedefs cimport attr_t, flags_t
 from .cfile cimport CFile
 from .lemmatizer import Lemmatizer
 
@@ -233,66 +233,187 @@ cdef class Vocab:
             assert not path.isdir(loc)
         cdef bytes bytes_loc = loc.encode('utf8') if type(loc) == unicode else loc
 
-        cdef CFile fp = CFile(bytes_loc, 'wb')
-        cdef size_t st
+
+        check_sizes()
+        
+        # Allocate a temporary buffer, with the lexemes. This prevents us from
+        # repeated iterating over the hash table.
+        cdef Pool tmp_mem = Pool()
+        # Allocate memory for the lexemes
+        # Note that this memory has to be allocated from self.mem! Otherwise
+        # the lexemes will be freed at the end of the function.
+        lexemes = <LexemeC*>self.mem.alloc(self.length, sizeof(LexemeC))
+
+        # Temporary buffers
         cdef size_t addr
         cdef hash_t key
+        cdef int i = 0
         for key, addr in self._by_hash.items():
             lexeme = <LexemeC*>addr
-            fp.write_from(&lexeme.orth, sizeof(lexeme.orth), 1)
-            fp.write_from(&lexeme.flags, sizeof(lexeme.flags), 1)
-            fp.write_from(&lexeme.id, sizeof(lexeme.id), 1)
-            fp.write_from(&lexeme.length, sizeof(lexeme.length), 1)
-            fp.write_from(&lexeme.orth, sizeof(lexeme.orth), 1)
-            fp.write_from(&lexeme.lower, sizeof(lexeme.lower), 1)
-            fp.write_from(&lexeme.norm, sizeof(lexeme.norm), 1)
-            fp.write_from(&lexeme.shape, sizeof(lexeme.shape), 1)
-            fp.write_from(&lexeme.prefix, sizeof(lexeme.prefix), 1)
-            fp.write_from(&lexeme.suffix, sizeof(lexeme.suffix), 1)
-            fp.write_from(&lexeme.cluster, sizeof(lexeme.cluster), 1)
-            fp.write_from(&lexeme.prob, sizeof(lexeme.prob), 1)
-            fp.write_from(&lexeme.sentiment, sizeof(lexeme.sentiment), 1)
-            fp.write_from(&lexeme.l2_norm, sizeof(lexeme.l2_norm), 1)
+            lexemes[i] = lexeme[0]
+            i += 1
+        i += 1
+        assert i == self.length, 'Wrote %d lexemes, but Vocab is length %d' % (i, self.length)
+
+        cdef CFile fp = CFile(bytes_loc, 'wb')
+        # Write length
+        fp.write_from(&self.length, 1, sizeof(self.length))
+ 
+        # Allocate memory for a buffers of flags_t, attr_t and float
+        flags_buffer = <flags_t*>tmp_mem.alloc(self.length, sizeof(flags_t))
+        attr_buffer = <attr_t*>tmp_mem.alloc(self.length, sizeof(attr_t))
+        float_buffer = <float*>tmp_mem.alloc(self.length, sizeof(float))
+
+        # Now fill arrays of data from he lexemes, and write them out.
+        # We have to iterate over the lexemes several times here --- but it's
+        # much better to do it this way than to do smaller writes.
+
+        # Write out LexemeC.flags
+        for i in range(self.length):
+            flags_buffer[i] = lexemes[i].flags
+        fp.write_from(flags_buffer, self.length, sizeof(flags_t))
+        # Write out LexemeC.id
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].id
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.length
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].length
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.orth
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].orth
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.lower
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].lower
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.norm
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].norm
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.shape
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].shape
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.prefix
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].prefix
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.suffix
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].suffix
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.cluster
+        for i in range(self.length):
+            attr_buffer[i] = lexemes[i].cluster
+        fp.write_from(attr_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.prob
+        for i in range(self.length):
+            float_buffer[i] = lexemes[i].prob
+        fp.write_from(float_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.sentiment
+        for i in range(self.length):
+            float_buffer[i] = lexemes[i].sentiment
+        fp.write_from(float_buffer, self.length, sizeof(attr_t))
+        # Write out LexemeC.l2_norm
+        for i in range(self.length):
+            float_buffer[i] = lexemes[i].l2_norm
+        fp.write_from(float_buffer, self.length, sizeof(attr_t))
         fp.close()
 
     def load_lexemes(self, loc):
         if not path.exists(loc):
             raise IOError('LexemeCs file not found at %s' % loc)
-        fp = CFile(loc, 'rb')
         cdef LexemeC* lexeme
+
+        check_sizes()
+
+        fp = CFile(loc, 'rb')
+        # Read length
+        fp.read_into(&self.length, 1, sizeof(self.length))
+        # Allocate memory for the lexemes
+        # Note that this memory has to be allocated from self.mem! Otherwise
+        # the lexemes will be freed at the end of the function.
+        lexemes = <LexemeC*>self.mem.alloc(self.length, sizeof(LexemeC))
+
+        # Temporary buffers
+        cdef Pool tmp_mem = Pool()
+        # Allocate memory for a buffer of flags_t
+        flags_buffer = <flags_t*>tmp_mem.alloc(self.length, sizeof(flags_t))
+        # Allocate memory for a buffer of attr_t
+        attr_buffer = <attr_t*>tmp_mem.alloc(self.length, sizeof(attr_t))
+        # Allocate memory for a buffer of float
+        float_buffer = <float*>tmp_mem.alloc(self.length, sizeof(float))
+
+        # Now read in arrays of data, and allocate them to the lexemes.
+        # We have to iterate over the vocab several times here --- but it's
+        # much better to do it this way than to do smaller reads.
+
+        # Read in LexemeC.flags
+        fp.read_into(flags_buffer, self.length, sizeof(flags_t))
+        for i in range(self.length):
+            lexemes[i].flags = flags_buffer[i]
+        # Read in LexemeC.id
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].id = attr_buffer[i]
+        # Read in LexemeC.length
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].length = attr_buffer[i]
+        # Read in LexemeC.orth
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].orth = attr_buffer[i]
+        # Read in LexemeC.lower
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].lower = attr_buffer[i]
+        # Read in LexemeC.norm
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].norm = attr_buffer[i]
+        # Read in LexemeC.shape
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].shape = attr_buffer[i]
+        # Read in LexemeC.prefix
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].prefix = attr_buffer[i]
+        # Read in LexemeC.suffix
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].suffix = attr_buffer[i]
+        # Read in LexemeC.cluster
+        fp.read_into(attr_buffer, self.length, sizeof(attr_t))
+        for i in range(self.length):
+            lexemes[i].cluster = attr_buffer[i]
+        # Read in LexemeC.prob
+        fp.read_into(float_buffer, self.length, sizeof(float))
+        for i in range(self.length):
+            lexemes[i].prob = float_buffer[i]
+        # Read in LexemeC.sentiment
+        fp.read_into(float_buffer, self.length, sizeof(float))
+        for i in range(self.length):
+            lexemes[i].sentiment = float_buffer[i]
+        # Read in LexemeC.l2_norm
+        fp.read_into(float_buffer, self.length, sizeof(float))
+        for i in range(self.length):
+            lexemes[i].l2_norm = float_buffer[i]
+        # Set vector to EMPTY_VEC
+        for i in range(self.length):
+            lexemes[i].vector = EMPTY_VEC
+        # Insert lexemes into hash table
         cdef hash_t key
         cdef unicode py_str
         cdef attr_t orth
-        assert sizeof(orth) == sizeof(lexeme.orth)
-        i = 0
-        while True:
-            try:
-                fp.read_into(&orth, 1, sizeof(orth))
-            except IOError:
-                break
-            lexeme = <LexemeC*>self.mem.alloc(sizeof(LexemeC), 1)
-            # Copy data from the file into the lexeme
-            fp.read_into(&lexeme.flags, 1, sizeof(lexeme.flags))
-            fp.read_into(&lexeme.id, 1, sizeof(lexeme.id))
-            fp.read_into(&lexeme.length, 1, sizeof(lexeme.length))
-            fp.read_into(&lexeme.orth, 1, sizeof(lexeme.orth))
-            fp.read_into(&lexeme.lower, 1, sizeof(lexeme.lower))
-            fp.read_into(&lexeme.norm, 1, sizeof(lexeme.norm))
-            fp.read_into(&lexeme.shape, 1, sizeof(lexeme.shape))
-            fp.read_into(&lexeme.prefix, 1, sizeof(lexeme.prefix))
-            fp.read_into(&lexeme.suffix, 1, sizeof(lexeme.suffix))
-            fp.read_into(&lexeme.cluster, 1, sizeof(lexeme.cluster))
-            fp.read_into(&lexeme.prob, 1, sizeof(lexeme.prob))
-            fp.read_into(&lexeme.sentiment, 1, sizeof(lexeme.sentiment))
-            fp.read_into(&lexeme.l2_norm, 1, sizeof(lexeme.l2_norm))
-
-            lexeme.vector = EMPTY_VEC
-            py_str = self.strings[lexeme.orth]
+        for i in range(self.length):
+            py_str = self.strings[lexemes[i].orth]
             key = hash_string(py_str)
-            self._by_hash.set(key, lexeme)
-            self._by_orth.set(lexeme.orth, lexeme)
-            self.length += 1
-            i += 1
+            self._by_hash.set(key, &lexemes[i])
+            self._by_orth.set(lexemes[i].orth, &lexemes[i])
         fp.close()
 
     def dump_vectors(self, out_loc):
@@ -462,3 +583,23 @@ class VectorReadError(Exception):
             "Vector size: %d\n"
             "Max size: %d\n"
             "Min size: 1\n" % (loc, size, MAX_VEC_SIZE))
+
+
+def check_sizes():
+    cdef LexemeC lexeme
+    # Check our assumptions about how everything is sized
+    assert sizeof(flags_t) == 8
+    assert sizeof(attr_t) == 4
+    assert sizeof(float) == 4
+    assert sizeof(lexeme.flags) == sizeof(flags_t)
+    assert sizeof(lexeme.id) == sizeof(attr_t)
+    assert sizeof(lexeme.length) == sizeof(attr_t)
+    assert sizeof(lexeme.orth) == sizeof(attr_t)
+    assert sizeof(lexeme.lower) == sizeof(attr_t)
+    assert sizeof(lexeme.norm) == sizeof(attr_t)
+    assert sizeof(lexeme.shape) == sizeof(attr_t)
+    assert sizeof(lexeme.suffix) == sizeof(attr_t)
+    assert sizeof(lexeme.cluster) == sizeof(attr_t)
+    assert sizeof(lexeme.prob) == sizeof(float)
+    assert sizeof(lexeme.sentiment) == sizeof(float)
+    assert sizeof(lexeme.l2_norm) == sizeof(float)
