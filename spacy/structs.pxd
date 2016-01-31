@@ -4,6 +4,7 @@ from .typedefs cimport flags_t, attr_t, hash_t
 from .parts_of_speech cimport univ_pos_t
 
 
+
 cdef struct LexemeC:
     float* vector
 
@@ -26,7 +27,7 @@ cdef struct LexemeC:
     float l2_norm
 
 
-cdef struct Entity:
+cdef struct EntityC:
     int start
     int end
     int label
@@ -52,3 +53,19 @@ cdef struct TokenC:
 
     int ent_iob
     int ent_type
+
+
+cdef struct ParseStateC:
+    int* _stack
+    int* _buffer
+    bint* shifted
+    TokenC* _sent
+    EntityC* _ents
+    TokenC _empty_token
+    int length
+    int _s_i
+    int _b_i
+    int _e_i
+    int _break
+
+

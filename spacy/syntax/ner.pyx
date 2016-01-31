@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from .transition_system cimport Transition
 from .transition_system cimport do_func_t
 
-from ..structs cimport TokenC, Entity
+from ..structs cimport TokenC 
 
 from thinc.typedefs cimport weight_t
 from ..gold cimport GoldParseC
@@ -238,7 +238,7 @@ cdef class In:
     @staticmethod
     cdef weight_t cost(StateClass s, const GoldParseC* gold, int label) nogil:
         move = IN
-        cdef int next_act = gold.ner[s.B(1)].move if s.B(0) < s.length else OUT
+        cdef int next_act = gold.ner[s.B(1)].move if s.B(0) < s.c.length else OUT
         cdef int g_act = gold.ner[s.B(0)].move
         cdef int g_tag = gold.ner[s.B(0)].label
         cdef bint is_sunk = _entity_is_sunk(s, gold.ner)

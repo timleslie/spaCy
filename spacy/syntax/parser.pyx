@@ -121,16 +121,14 @@ cdef class Parser:
 
             action = self.moves.c[guess]
             if not eg.c.is_valid[guess]:
-                with gil:
-                    move_name = self.moves.move_name(action.move, action.label)
-                    raise ValueError("Illegal action: %s" % move_name)
+                break
             action.do(stcls, action.label)
             memset(eg.c.scores, 0, sizeof(eg.c.scores[0]) * eg.c.nr_class)
             memset(eg.c.costs, 0, sizeof(eg.c.costs[0]) * eg.c.nr_class)
             for i in range(eg.c.nr_class):
                 eg.c.is_valid[i] = 1
         self.moves.finalize_state(stcls)
-        tokens.set_parse(stcls._sent)
+        tokens.set_parse(stcls.c._sent)
   
     def train(self, Doc tokens, GoldParse gold):
         self.moves.preprocess_gold(gold)
@@ -235,7 +233,7 @@ cdef class StepwiseState:
     def finish(self):
         if self.stcls.is_final():
             self.parser.moves.finalize_state(self.stcls)
-        self.doc.set_parse(self.stcls._sent)
+        self.doc.set_parse(self.stcls.c._sent)
 
 
 cdef int _arg_max_clas(const weight_t* scores, int move, const Transition* actions,

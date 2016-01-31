@@ -2,45 +2,35 @@ from libc.string cimport memcpy, memset
 
 from cymem.cymem cimport Pool
 
-from ..structs cimport TokenC, Entity
+from ..structs cimport ParseStateC, TokenC
 
 from ..vocab cimport EMPTY_LEXEME
 
 
 cdef class StateClass:
     cdef Pool mem
-    cdef int* _stack
-    cdef int* _buffer
-    cdef bint* shifted
-    cdef TokenC* _sent
-    cdef Entity* _ents
-    cdef TokenC _empty_token
-    cdef int length
-    cdef int _s_i
-    cdef int _b_i
-    cdef int _e_i
-    cdef int _break
-
+    cdef ParseStateC c
+    
     @staticmethod
     cdef inline StateClass init(const TokenC* sent, int length):
         cdef StateClass self = StateClass(length)
         cdef int i
         for i in range(length):
-            self._sent[i] = sent[i]
-            self._buffer[i] = i
+            self.c._sent[i] = sent[i]
+            self.c._buffer[i] = i
         for i in range(length, length + 5):
-            self._sent[i].lex = &EMPTY_LEXEME
+            self.c._sent[i].lex = &EMPTY_LEXEME
         return self
 
     cdef inline int S(self, int i) nogil:
-        if i >= self._s_i:
+        if i >= self.c._s_i:
             return -1
-        return self._stack[self._s_i - (i+1)]
+        return self.c._stack[self.c._s_i - (i+1)]
 
     cdef inline int B(self, int i) nogil:
-        if (i + self._b_i) >= self.length:
+        if (i + self.c._b_i) >= self.c.length:
             return -1
-        return self._buffer[self._b_i + i]
+        return self.c._buffer[self.c._b_i + i]
 
     cdef inline const TokenC* S_(self, int i) nogil:
         return self.safe_get(self.S(i))
@@ -61,15 +51,15 @@ cdef class StateClass:
         return self.safe_get(self.R(i, idx))
 
     cdef inline const TokenC* safe_get(self, int i) nogil:
-        if i < 0 or i >= self.length:
-            return &self._empty_token
+        if i < 0 or i >= self.c.length:
+            return &self.c._empty_token
         else:
-            return &self._sent[i]
+            return &self.c._sent[i]
 
     cdef inline int H(self, int i) nogil:
-        if i < 0 or i >= self.length:
+        if i < 0 or i >= self.c.length:
             return -1
-        return self._sent[i].head + i
+        return self.c._sent[i].head + i
 
     cdef int E(self, int i) nogil
 
@@ -78,16 +68,16 @@ cdef class StateClass:
     cdef int L(self, int i, int idx) nogil
 
     cdef inline bint empty(self) nogil:
-        return self._s_i <= 0
+        return self.c._s_i <= 0
 
     cdef inline bint eol(self) nogil:
         return self.buffer_length() == 0
 
     cdef inline bint at_break(self) nogil:
-        return self._break != -1
+        return self.c._break != -1
 
     cdef inline bint is_final(self) nogil:
-        return self.stack_depth() <= 0 and self._b_i >= self.length
+        return self.stack_depth() <= 0 and self.c._b_i >= self.c.length
 
     cdef inline bint has_head(self, int i) nogil:
         return self.safe_get(i).head != 0
@@ -102,18 +92,18 @@ cdef class StateClass:
         return False
 
     cdef inline bint entity_is_open(self) nogil:
-        if self._e_i < 1:
+        if self.c._e_i < 1:
             return False
-        return self._ents[self._e_i-1].end == -1
+        return self.c._ents[self.c._e_i-1].end == -1
 
     cdef inline int stack_depth(self) nogil:
-        return self._s_i
+        return self.c._s_i
 
     cdef inline int buffer_length(self) nogil:
-        if self._break != -1:
-            return self._break - self._b_i
+        if self.c._break != -1:
+            return self.c._break - self.c._b_i
         else:
-            return self.length - self._b_i
+            return self.c.length - self.c._b_i
 
     cdef void push(self) nogil
 
