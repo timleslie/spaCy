@@ -59,9 +59,9 @@ cdef struct ParseStateC:
     int* _stack
     int* _buffer
     bint* shifted
-    TokenC* _sent
-    EntityC* _ents
-    TokenC _empty_token
+    TokenC* sent
+    EntityC* ents
+    TokenC empty_token
     int length
     int _s_i
     int _b_i
