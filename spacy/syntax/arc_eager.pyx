@@ -17,6 +17,7 @@ from libc.string cimport memcpy
 
 from cymem.cymem cimport Pool
 from .stateclass cimport StateClass
+from ..structs cimport ParseStateC
 
 
 DEF NON_MONOTONIC = True
@@ -379,20 +380,20 @@ cdef class ArcEager(TransitionSystem):
     cdef int initialize_state(self, StateClass st) except -1:
         # Ensure sent_start is set to 0 throughout
         for i in range(st.c.length):
-            st.c._sent[i].sent_start = False
-            st.c._sent[i].l_edge = i
-            st.c._sent[i].r_edge = i
+            st.c.sent[i].sent_start = False
+            st.c.sent[i].l_edge = i
+            st.c.sent[i].r_edge = i
         st.fast_forward()
 
     cdef int finalize_state(self, StateClass st) nogil:
         cdef int i
         for i in range(st.c.length):
-            if st.c._sent[i].head == 0 and st.c._sent[i].dep == 0:
-                st.c._sent[i].dep = self.root_label
+            if st.c.sent[i].head == 0 and st.c.sent[i].dep == 0:
+                st.c.sent[i].dep = self.root_label
             # If we're not using the Break transition, we segment via root-labelled
             # arcs between the root words.
-            elif USE_ROOT_ARC_SEGMENT and st.c._sent[i].dep == self.root_label:
-                st.c._sent[i].head = 0
+            elif USE_ROOT_ARC_SEGMENT and st.c.sent[i].dep == self.root_label:
+                st.c.sent[i].head = 0
 
     cdef int set_valid(self, int* output, StateClass stcls) nogil:
         cdef bint[N_MOVES] is_valid

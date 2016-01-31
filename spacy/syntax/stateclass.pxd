@@ -16,10 +16,10 @@ cdef class StateClass:
         cdef StateClass self = StateClass(length)
         cdef int i
         for i in range(length):
-            self.c._sent[i] = sent[i]
+            self.c.sent[i] = sent[i]
             self.c._buffer[i] = i
         for i in range(length, length + 5):
-            self.c._sent[i].lex = &EMPTY_LEXEME
+            self.c.sent[i].lex = &EMPTY_LEXEME
         return self
 
     cdef inline int S(self, int i) nogil:
@@ -52,14 +52,14 @@ cdef class StateClass:
 
     cdef inline const TokenC* safe_get(self, int i) nogil:
         if i < 0 or i >= self.c.length:
-            return &self.c._empty_token
+            return &self.c.empty_token
         else:
-            return &self.c._sent[i]
+            return &self.c.sent[i]
 
     cdef inline int H(self, int i) nogil:
         if i < 0 or i >= self.c.length:
             return -1
-        return self.c._sent[i].head + i
+        return self.c.sent[i].head + i
 
     cdef int E(self, int i) nogil
 
@@ -94,7 +94,7 @@ cdef class StateClass:
     cdef inline bint entity_is_open(self) nogil:
         if self.c._e_i < 1:
             return False
-        return self.c._ents[self.c._e_i-1].end == -1
+        return self.c.ents[self.c._e_i-1].end == -1
 
     cdef inline int stack_depth(self) nogil:
         return self.c._s_i

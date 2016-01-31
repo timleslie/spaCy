@@ -128,7 +128,7 @@ cdef class Parser:
             for i in range(eg.c.nr_class):
                 eg.c.is_valid[i] = 1
         self.moves.finalize_state(stcls)
-        tokens.set_parse(stcls.c._sent)
+        tokens.set_parse(stcls.c.sent)
   
     def train(self, Doc tokens, GoldParse gold):
         self.moves.preprocess_gold(gold)
@@ -202,7 +202,7 @@ cdef class StepwiseState:
 
     @property
     def deps(self):
-        return [self.doc.vocab.strings[self.stcls._sent[i].dep]
+        return [self.doc.vocab.strings[self.stcls.sent[i].dep]
                 for i in range(self.stcls.length)]
 
     def predict(self):
@@ -233,7 +233,7 @@ cdef class StepwiseState:
     def finish(self):
         if self.stcls.is_final():
             self.parser.moves.finalize_state(self.stcls)
-        self.doc.set_parse(self.stcls.c._sent)
+        self.doc.set_parse(self.stcls.c.sent)
 
 
 cdef int _arg_max_clas(const weight_t* scores, int move, const Transition* actions,

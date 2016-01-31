@@ -15,17 +15,17 @@ cdef class StateClass:
         self.c._buffer = <int*>mem.alloc(length + (PADDING * 2), sizeof(int))
         self.c._stack = <int*>mem.alloc(length + (PADDING * 2), sizeof(int))
         self.c.shifted = <bint*>mem.alloc(length + (PADDING * 2), sizeof(bint))
-        self.c._sent = <TokenC*>mem.alloc(length + (PADDING * 2), sizeof(TokenC))
-        self.c._ents = <EntityC*>mem.alloc(length + (PADDING * 2), sizeof(EntityC))
+        self.c.sent = <TokenC*>mem.alloc(length + (PADDING * 2), sizeof(TokenC))
+        self.c.ents = <EntityC*>mem.alloc(length + (PADDING * 2), sizeof(EntityC))
         cdef int i
         for i in range(length + (PADDING * 2)):
-            self.c._ents[i].end = -1
-            self.c._sent[i].l_edge = i
-            self.c._sent[i].r_edge = i
+            self.c.ents[i].end = -1
+            self.c.sent[i].l_edge = i
+            self.c.sent[i].r_edge = i
         for i in range(length, length + (PADDING * 2)):
-            self.c._sent[i].lex = &EMPTY_LEXEME
-        self.c._sent += PADDING
-        self.c._ents += PADDING
+            self.c.sent[i].lex = &EMPTY_LEXEME
+        self.c.sent += PADDING
+        self.c.ents += PADDING
         self.c._buffer += PADDING
         self.c._stack += PADDING
         self.c.shifted += PADDING
@@ -36,7 +36,7 @@ cdef class StateClass:
         self.c._e_i = 0
         for i in range(length):
             self.c._buffer[i] = i
-        self.c._empty_token.lex = &EMPTY_LEXEME
+        self.c.empty_token.lex = &EMPTY_LEXEME
 
     @property
     def stack(self):
@@ -51,17 +51,17 @@ cdef class StateClass:
             return 0
         if i < 0 or i >= self.c._e_i:
             return 0
-        return self.c._ents[self.c._e_i - (i+1)].start
+        return self.c.ents[self.c._e_i - (i+1)].start
 
     cdef int L(self, int i, int idx) nogil:
         if idx < 1:
             return -1
         if i < 0 or i >= self.c.length:
             return -1
-        cdef const TokenC* target = &self.c._sent[i]
+        cdef const TokenC* target = &self.c.sent[i]
         if target.l_kids < idx:
             return -1
-        cdef const TokenC* ptr = &self.c._sent[target.l_edge]
+        cdef const TokenC* ptr = &self.c.sent[target.l_edge]
 
         while ptr < target:
             # If this head is still to the right of us, we can skip to it
@@ -73,7 +73,7 @@ cdef class StateClass:
             elif ptr + ptr.head == target:
                 idx -= 1
                 if idx == 0:
-                    return ptr - self.c._sent
+                    return ptr - self.c.sent
                 ptr += 1
             else:
                 ptr += 1
@@ -84,10 +84,10 @@ cdef class StateClass:
             return -1
         if i < 0 or i >= self.c.length:
             return -1
-        cdef const TokenC* target = &self.c._sent[i]
+        cdef const TokenC* target = &self.c.sent[i]
         if target.r_kids < idx:
             return -1
-        cdef const TokenC* ptr = &self.c._sent[target.r_edge]
+        cdef const TokenC* ptr = &self.c.sent[target.r_edge]
         while ptr > target:
             # If this head is still to the right of us, we can skip to it
             # No token that's between this token and this head could be our
@@ -97,7 +97,7 @@ cdef class StateClass:
             elif ptr + ptr.head == target:
                 idx -= 1
                 if idx == 0:
-                    return ptr - self.c._sent
+                    return ptr - self.c.sent
                 ptr -= 1
             else:
                 ptr -= 1
@@ -148,26 +148,26 @@ cdef class StateClass:
             self.del_arc(self.H(child), child)
 
         cdef int dist = head - child
-        self.c._sent[child].head = dist
-        self.c._sent[child].dep = label
+        self.c.sent[child].head = dist
+        self.c.sent[child].dep = label
         cdef int i
         if child > head:
-            self.c._sent[head].r_kids += 1
+            self.c.sent[head].r_kids += 1
             # Some transition systems can have a word in the buffer have a
             # rightward child, e.g. from Unshift.
-            self.c._sent[head].r_edge = self.c._sent[child].r_edge
+            self.c.sent[head].r_edge = self.c.sent[child].r_edge
             i = 0
             while self.has_head(head) and i < self.c.length:
                 head = self.H(head)
-                self.c._sent[head].r_edge = self.c._sent[child].r_edge
+                self.c.sent[head].r_edge = self.c.sent[child].r_edge
                 i += 1 # Guard against infinite loops
         else:
-            self.c._sent[head].l_kids += 1
-            self.c._sent[head].l_edge = self.c._sent[child].l_edge
+            self.c.sent[head].l_kids += 1
+            self.c.sent[head].l_edge = self.c.sent[child].l_edge
 
     cdef void del_arc(self, int h_i, int c_i) nogil:
         cdef int dist = h_i - c_i
-        cdef TokenC* h = &self.c._sent[h_i]
+        cdef TokenC* h = &self.c.sent[h_i]
         if c_i > h_i:
             h.r_edge = self.R_(h_i, 2).r_edge if h.r_kids >= 2 else h_i
             h.r_kids -= 1
@@ -176,32 +176,32 @@ cdef class StateClass:
             h.l_kids -= 1
 
     cdef void open_ent(self, int label) nogil:
-        self.c._ents[self.c._e_i].start = self.B(0)
-        self.c._ents[self.c._e_i].label = label
-        self.c._ents[self.c._e_i].end = -1
+        self.c.ents[self.c._e_i].start = self.B(0)
+        self.c.ents[self.c._e_i].label = label
+        self.c.ents[self.c._e_i].end = -1
         self.c._e_i += 1
 
     cdef void close_ent(self) nogil:
         # Note that we don't decrement _e_i here! We want to maintain all
         # entities, not over-write them...
-        self.c._ents[self.c._e_i-1].end = self.B(0)+1
-        self.c._sent[self.B(0)].ent_iob = 1
+        self.c.ents[self.c._e_i-1].end = self.B(0)+1
+        self.c.sent[self.B(0)].ent_iob = 1
 
     cdef void set_ent_tag(self, int i, int ent_iob, int ent_type) nogil:
         if 0 <= i < self.c.length:
-            self.c._sent[i].ent_iob = ent_iob
-            self.c._sent[i].ent_type = ent_type
+            self.c.sent[i].ent_iob = ent_iob
+            self.c.sent[i].ent_type = ent_type
 
     cdef void set_break(self, int _) nogil:
         if 0 <= self.B(0) < self.c.length: 
-            self.c._sent[self.B(0)].sent_start = True
+            self.c.sent[self.B(0)].sent_start = True
             self.c._break = self.c._b_i
 
     cdef void clone(self, StateClass src) nogil:
-        memcpy(self.c._sent, src.c._sent, self.c.length * sizeof(TokenC))
+        memcpy(self.c.sent, src.c.sent, self.c.length * sizeof(TokenC))
         memcpy(self.c._stack, src.c._stack, self.c.length * sizeof(int))
         memcpy(self.c._buffer, src.c._buffer, self.c.length * sizeof(int))
-        memcpy(self.c._ents, src.c._ents, self.c.length * sizeof(EntityC))
+        memcpy(self.c.ents, src.c.ents, self.c.length * sizeof(EntityC))
         self.c._b_i = src.c._b_i
         self.c._s_i = src.c._s_i
         self.c._e_i = src.c._e_i
