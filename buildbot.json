@@ -1,7 +1,7 @@
 {
     "build": {
         "sdist": [
-            "pip install cython",
+            "pip install cython numpy",
             "pip install -v git+git://github.com/syllog1sm/cython-murmurhash.git#egg=murmurhash",
             "pip install -v git+git://github.com/syllog1sm/cymem.git#egg=cymem",
             "pip install -v git+git://github.com/syllog1sm/preshed.git#egg=preshed",
@@ -10,7 +10,7 @@
             "python setup.py sdist"
         ],
         "install": [
-            "pip install cython",
+            "pip install cython numpy",
             "pip install -v git+git://github.com/syllog1sm/cython-murmurhash.git#egg=murmurhash",
             "pip install -v git+git://github.com/syllog1sm/cymem.git#egg=cymem",
             "pip install -v git+git://github.com/syllog1sm/preshed.git#egg=preshed",
@@ -18,7 +18,7 @@
             "pip install -v source.tar.gz"
         ],
         "wheel": [
-            "pip install cython",
+            "pip install cython numpy",
             "pip install -v git+git://github.com/syllog1sm/cython-murmurhash.git#egg=murmurhash",
             "pip install -v git+git://github.com/syllog1sm/cymem.git#egg=cymem",
             "pip install -v git+git://github.com/syllog1sm/preshed.git#egg=preshed",
