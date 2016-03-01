@@ -2,17 +2,26 @@
     "build": {
         "sdist": [
             "pip install cython",
+            "pip install -v git+git://github.com/syllog1sm/cython-murmurhash.git#egg=murmurhash",
+            "pip install -v git+git://github.com/syllog1sm/cymem.git#egg=cymem",
+            "pip install -v git+git://github.com/syllog1sm/preshed.git#egg=preshed",
             "pip install -v git+git://github.com/spacy-io/thinc.git#egg=thinc",
             "pip install -r requirements.txt",
             "python setup.py sdist"
         ],
         "install": [
             "pip install cython",
+            "pip install -v git+git://github.com/syllog1sm/cython-murmurhash.git#egg=murmurhash",
+            "pip install -v git+git://github.com/syllog1sm/cymem.git#egg=cymem",
+            "pip install -v git+git://github.com/syllog1sm/preshed.git#egg=preshed",
             "pip install -v git+git://github.com/spacy-io/thinc.git#egg=thinc",
             "pip install -v source.tar.gz"
         ],
         "wheel": [
             "pip install cython",
+            "pip install -v git+git://github.com/syllog1sm/cython-murmurhash.git#egg=murmurhash",
+            "pip install -v git+git://github.com/syllog1sm/cymem.git#egg=cymem",
+            "pip install -v git+git://github.com/syllog1sm/preshed.git#egg=preshed",
             "pip install -v git+git://github.com/spacy-io/thinc.git#egg=thinc",
             "python untar.py source.tar.gz .",
             "python setup.py bdist_wheel",
