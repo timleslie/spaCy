@@ -16,8 +16,6 @@ from .matcher import Matcher
 from .serialize.packer import Packer
 from . import attrs
 from . import orth
-from .syntax.ner import BiluoPushDown
-from .syntax.arc_eager import ArcEager
 
 from . import util
 from . import about
@@ -27,114 +25,41 @@ from .attrs import TAG, DEP, ENT_IOB, ENT_TYPE, HEAD
 class Language(object):
     lang = None
 
-    @staticmethod
-    def lower(string):
-        return string.lower()
+    Vocab = vocab.Vocab
+    Tokenizer = tokenizer.Tokenizer
+    Parser = syntax.parser.ParserFactory(ArcEager, {0: {'ROOT': True}})
+    Entity = syntax.parser.ParserFactory(BiluoPushdown,
+                {0: {'PER': True, 'LOC': True, 'ORG': True, 'MISC': True}})
+    Tagger = tagger.Tagger
+    Matcher = matcher.Matcher
 
-    @staticmethod
-    def norm(string):
-        return string
-
-    @staticmethod
-    def prefix(string):
-        return string[0]
-
-    @staticmethod
-    def suffix(string):
-        return string[-3:]
-
-    @staticmethod
-    def cluster(string):
-        return 0
-
-    @staticmethod
-    def is_digit(string):
-        return string.isdigit()
-
-    @staticmethod
-    def is_space(string):
-        return string.isspace()
-
-    @staticmethod
-    def is_stop(string):
-        return 0
-
-    @classmethod
-    def default_lex_attrs(cls, *args, **kwargs):
-        oov_prob = kwargs.get('oov_prob', -20)
-        return {
-            attrs.LOWER: cls.lower,
-            attrs.NORM: cls.norm,
-            attrs.SHAPE: orth.word_shape,
-            attrs.PREFIX: cls.prefix,
-            attrs.SUFFIX: cls.suffix,
-            attrs.CLUSTER: cls.cluster,
-            attrs.PROB: lambda string: oov_prob,
-            attrs.LANG: lambda string: cls.lang,
-            attrs.IS_ALPHA: orth.is_alpha,
-            attrs.IS_ASCII: orth.is_ascii,
-            attrs.IS_DIGIT: cls.is_digit,
-            attrs.IS_LOWER: orth.is_lower,
-            attrs.IS_PUNCT: orth.is_punct,
-            attrs.IS_SPACE: cls.is_space,
-            attrs.IS_TITLE: orth.is_title,
-            attrs.IS_UPPER: orth.is_upper,
-            attrs.IS_BRACKET: orth.is_bracket,
-            attrs.IS_QUOTE: orth.is_quote,
-            attrs.IS_LEFT_PUNCT: orth.is_left_punct,
-            attrs.IS_RIGHT_PUNCT: orth.is_right_punct,
-            attrs.LIKE_URL: orth.like_url,
-            attrs.LIKE_NUM: orth.like_number,
-            attrs.LIKE_EMAIL: orth.like_email,
-            attrs.IS_STOP: cls.is_stop,
-            attrs.IS_OOV: lambda string: True
-        }
-
-    @classmethod
-    def default_dep_labels(cls):
-        return {0: {'ROOT': True}}
-
-    @classmethod
-    def default_ner_labels(cls):
-        return {0: {'PER': True, 'LOC': True, 'ORG': True, 'MISC': True}}
-
-    @classmethod
-    def default_vocab(cls, package, get_lex_attr=None, vectors_package=None):
-        if get_lex_attr is None:
-            if package.has_file('vocab', 'oov_prob'):
-                with package.open(('vocab', 'oov_prob')) as file_:
-                    oov_prob = float(file_.read().strip())
-                get_lex_attr = cls.default_lex_attrs(oov_prob=oov_prob)
-            else:
-                get_lex_attr = cls.default_lex_attrs()
-        if hasattr(package, 'dir_path'):
-            return Vocab.from_package(package, get_lex_attr=get_lex_attr,
-                vectors_package=vectors_package)
-        else:
-            return Vocab.load(package, get_lex_attr)
-
-    @classmethod
-    def default_parser(cls, package, vocab):
-        if hasattr(package, 'dir_path'):
-            data_dir = package.dir_path('deps')
-        else:
-            data_dir = package
-        if data_dir and path.exists(data_dir):
-            return Parser.from_dir(data_dir, vocab.strings, ArcEager)
-        else:
-            return None
-
-    @classmethod
-    def default_entity(cls, package, vocab):
-        if hasattr(package, 'dir_path'):
-            data_dir = package.dir_path('ner')
-        else:
-            data_dir = package
-        if data_dir and path.exists(data_dir):
-            return Parser.from_dir(data_dir, vocab.strings, BiluoPushDown)
-        else:
-            return None
-
+    lex_attrs = {
+        attrs.LOWER: orth.lower,
+        attrs.NORM: orth.norm,
+        attrs.SHAPE: orth.word_shape,
+        attrs.PREFIX: orth.prefix,
+        attrs.SUFFIX: orth.suffix,
+        attrs.CLUSTER: orth.cluster,
+        attrs.PROB: lambda string: -20,
+        attrs.IS_ALPHA: orth.is_alpha,
+        attrs.IS_ASCII: orth.is_ascii,
+        attrs.IS_DIGIT: cls.is_digit,
+        attrs.IS_LOWER: orth.is_lower,
+        attrs.IS_PUNCT: orth.is_punct,
+        attrs.IS_SPACE: orth.is_space,
+        attrs.IS_TITLE: orth.is_title,
+        attrs.IS_UPPER: orth.is_upper,
+        attrs.IS_BRACKET: orth.is_bracket,
+        attrs.IS_QUOTE: orth.is_quote,
+        attrs.IS_LEFT_PUNCT: orth.is_left_punct,
+        attrs.IS_RIGHT_PUNCT: orth.is_right_punct,
+        attrs.LIKE_URL: orth.like_url,
+        attrs.LIKE_NUM: orth.like_number,
+        attrs.LIKE_EMAIL: orth.like_email,
+        attrs.IS_STOP: lambda string: False,
+        attrs.IS_OOV: lambda string: True
+    }
+    
     def __init__(self,
         data_dir=None,
         vocab=None,
@@ -144,7 +69,6 @@ class Language(object):
         entity=None,
         matcher=None,
         serializer=None,
-        load_vectors=True,
         package=None,
         vectors_package=None):
         """
@@ -171,26 +95,26 @@ class Language(object):
             else:
                 package = util.get_package(data_dir)
 
-        if load_vectors is not True:
-            warn("load_vectors is deprecated", DeprecationWarning)
-
         if vocab in (None, True):
-            vocab = self.default_vocab(package, vectors_package=vectors_package)
+            vocab = self.Vocab.load(
+                        package.cd('vocab'),
+                        get_lex_attr=get_lex_attr,
+                        vectors=vectors_package)
         self.vocab = vocab
         if tokenizer in (None, True):
-            tokenizer = Tokenizer.from_package(package, self.vocab)
+            tokenizer = self.Tokenizer.load(package.cd('tokenizer'), self.vocab)
         self.tokenizer = tokenizer
         if tagger in (None, True):
-            tagger = Tagger.from_package(package, self.vocab)
+            tagger = self.Tagger.load(package.cd('tagger'), self.vocab)
         self.tagger = tagger
         if entity in (None, True):
-            entity = self.default_entity(package, self.vocab)
+            entity = self.Entity.load(package.cd('entity'), self.vocab)
         self.entity = entity
         if parser in (None, True):
-            parser = self.default_parser(package, self.vocab)
+            parser = self.Parser.load(package.cd('parser'), self.vocab)
         self.parser = parser
         if matcher in (None, True):
-            matcher = Matcher.from_package(package, self.vocab)
+            matcher = self.Matcher.load(package.cd('matcher'), self.vocab)
         self.matcher = matcher
 
     def __reduce__(self):
@@ -299,3 +223,44 @@ class Language(object):
                     (ENT_TYPE, entity_type_freqs),
                     (HEAD, head_freqs)
                 ]))
+
+
+#
+#    @classmethod
+#    def default_vocab(cls, package, get_lex_attr=None, vectors_package=None):
+#        if get_lex_attr is None:
+#            if package.has_file('vocab', 'oov_prob'):
+#                with package.open(('vocab', 'oov_prob')) as file_:
+#                    oov_prob = float(file_.read().strip())
+#                get_lex_attr = cls.default_lex_attrs(oov_prob=oov_prob)
+#            else:
+#                get_lex_attr = cls.default_lex_attrs()
+#        if hasattr(package, 'dir_path'):
+#            return Vocab.from_package(package, get_lex_attr=get_lex_attr,
+#                vectors_package=vectors_package)
+#        else:
+#            return Vocab.load(package, get_lex_attr)
+#
+#    @classmethod
+#    def default_parser(cls, package, vocab):
+#        if hasattr(package, 'dir_path'):
+#            data_dir = package.dir_path('deps')
+#        else:
+#            data_dir = package
+#        if data_dir and path.exists(data_dir):
+#            return Parser.from_dir(data_dir, vocab.strings, ArcEager)
+#        else:
+#            return None
+#
+#    @classmethod
+#    def default_entity(cls, package, vocab):
+#        if hasattr(package, 'dir_path'):
+#            data_dir = package.dir_path('ner')
+#        else:
+#            data_dir = package
+#        if data_dir and path.exists(data_dir):
+#            return Parser.from_dir(data_dir, vocab.strings, BiluoPushDown)
+#        else:
+#            return None
+#
+#

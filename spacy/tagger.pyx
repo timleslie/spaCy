@@ -108,57 +108,51 @@ cdef class Tagger:
     def read_config(cls, data_dir):
         return json.load(open(path.join(data_dir, 'pos', 'config.json')))
 
-    @classmethod
-    def default_templates(cls):
-        return (
-            (W_orth,),
-            (P1_lemma, P1_pos),
-            (P2_lemma, P2_pos),
-            (N1_orth,),
-            (N2_orth,),
+    templates = (
+        (W_orth,),
+        (P1_lemma, P1_pos),
+        (P2_lemma, P2_pos),
+        (N1_orth,),
+        (N2_orth,),
 
-            (W_suffix,),
-            (W_prefix,),
+        (W_suffix,),
+        (W_prefix,),
 
-            (P1_pos,),
-            (P2_pos,),
-            (P1_pos, P2_pos),
-            (P1_pos, W_orth),
-            (P1_suffix,),
-            (N1_suffix,),
+        (P1_pos,),
+        (P2_pos,),
+        (P1_pos, P2_pos),
+        (P1_pos, W_orth),
+        (P1_suffix,),
+        (N1_suffix,),
 
-            (W_shape,),
-            (W_cluster,),
-            (N1_cluster,),
-            (N2_cluster,),
-            (P1_cluster,),
-            (P2_cluster,),
+        (W_shape,),
+        (W_cluster,),
+        (N1_cluster,),
+        (N2_cluster,),
+        (P1_cluster,),
+        (P2_cluster,),
 
-            (W_flags,),
-            (N1_flags,),
-            (N2_flags,),
-            (P1_flags,),
-            (P2_flags,),
-        )
+        (W_flags,),
+        (N1_flags,),
+        (N2_flags,),
+        (P1_flags,),
+        (P2_flags,),
+    )
 
     @classmethod
-    def blank(cls, vocab, templates):
+    def blank(cls, vocab, templates=None):
+        if templates is None:
+            templates = cls.templates
         model = TaggerModel(templates)
         return cls(vocab, model)
 
     @classmethod
     def load(cls, data_dir, vocab):
-        return cls.from_package(get_package(data_dir), vocab=vocab)
-
-    @classmethod
-    def from_package(cls, pkg, vocab):
-        # TODO: templates.json deprecated? not present in latest package
-        # templates = cls.default_templates()
-        templates = pkg.load_json(('pos', 'templates.json'), default=cls.default_templates())
-
+        package = get_package(data_dir)
+        package.load_json(('pos', 'templates.json'), default=cls.templates)
         model = TaggerModel(templates)
         if pkg.has_file('pos', 'model'):
-            model.load(pkg.file_path('pos', 'model'))
+            model.load(package.file_path('pos', 'model'))
         return cls(vocab, model)
 
     def __init__(self, Vocab vocab, TaggerModel model):

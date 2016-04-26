@@ -80,31 +80,23 @@ cdef class ParserModel(AveragedPerceptron):
 
 
 cdef class Parser:
-    def __init__(self, StringStore strings, transition_system, ParserModel model, int projectivize = 0):
+    def __init__(self, StringStore strings, transition_system, ParserModel model):
         self.moves = transition_system
         self.model = model
-        self._projectivize = projectivize
 
     @classmethod
-    def from_dir(cls, model_dir, strings, transition_system):
+    def load(cls, data_dir, strings, transition_system):
         if not os.path.exists(model_dir):
             print >> sys.stderr, "Warning: No model found at", model_dir
         elif not os.path.isdir(model_dir):
             print >> sys.stderr, "Warning: model path:", model_dir, "is not a directory"
         cfg = Config.read(model_dir, 'config')
-        moves = transition_system(strings, cfg.labels)
+        moves = transition_system(strings, cfg.labels, cfg.get('projectivize', False))
         templates = get_templates(cfg.features)
         model = ParserModel(templates)
-        project = cfg.projectivize if hasattr(cfg,'projectivize') else False
         if path.exists(path.join(model_dir, 'model')):
             model.load(path.join(model_dir, 'model'))
-        return cls(strings, moves, model, project)
-
-    @classmethod
-    def load(cls, pkg_or_str_or_file, vocab):
-        # TODO
-        raise NotImplementedError(
-                "This should be here, but isn't yet =/. Use Parser.from_dir")
+        return cls(strings, moves, model)
 
     def __reduce__(self):
         return (Parser, (self.moves.strings, self.moves, self.model), None, None)
@@ -163,7 +155,7 @@ cdef class Parser:
         if self._projectivize:
             PseudoProjectivity.deprojectivize(doc)
         # set annotation-specific iterators
-        doc.noun_chunks = CHUNKERS.get(doc.vocab.lang,DocIterator)
+        doc.noun_chunks = CHUNKERS.get(doc.vocab.lang, DocIterator)
         # mark doc as parsed
         doc.is_parsed = True
 
@@ -188,9 +180,6 @@ cdef class Parser:
 
             action = self.moves.c[guess]
             if not eg.is_valid[guess]:
-                # with gil:
-                #     move_name = self.moves.move_name(action.move, action.label)
-                #     print 'invalid action:', move_name
                 return 1
 
             action.do(state, action.label)
