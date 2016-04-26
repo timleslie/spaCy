@@ -451,3 +451,4 @@ cdef class ArcEager(TransitionSystem):
                 is_valid[i] = False
                 costs[i] = 9000
         assert n_gold >= 1
+

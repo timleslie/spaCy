@@ -150,8 +150,8 @@ cdef class Tagger:
     def load(cls, data_dir, vocab):
         package = get_package(data_dir)
         package.load_json(('pos', 'templates.json'), default=cls.templates)
-        model = TaggerModel(templates)
-        if pkg.has_file('pos', 'model'):
+        model = TaggerModel(cls.templates)
+        if package.has_file('pos', 'model'):
             model.load(package.file_path('pos', 'model'))
         return cls(vocab, model)
 

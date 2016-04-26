@@ -364,14 +364,14 @@ cdef class Doc:
         for i in range(self.length, self.max_length + PADDING):
             self.c[i].lex = &EMPTY_LEXEME
 
-    cdef void set_parse(self, const TokenC* parsed) nogil:
-        # TODO: This method is fairly misleading atm. It's used by Parser
-        # to actually apply the parse calculated. Need to rethink this.
-
-        # Probably we should use from_array?
+    def finalize_parse(self, deprojective=False, noun_chunk_iterator=None):
         self.is_parsed = True
-        for i in range(self.length):
-            self.c[i] = parsed[i]
+        if deprojectivize:
+            PseudoProjectivity.deprojectivize(self)
+        set_children_from_heads(self.c, self.length)
+        if noun_chunk_iterator is None:
+            noun_chunk_iterator = CHUNKERS.get(self.vocab.lang, DocIterator)
+        self.noun_chunks = noun_chunk_iterator
 
     def from_array(self, attrs, array):
         cdef int i, col
@@ -406,10 +406,9 @@ cdef class Doc:
                     tokens[i].ent_type = values[i]
             else:
                 raise ValueError("Unknown attribute ID: %d" % attr_id)
-        set_children_from_heads(self.c, self.length)
-        self.is_parsed = bool(HEAD in attrs or DEP in attrs)
+        if HEAD in attrs or DEP in attrs:
+            self.finalize_parse(False)
         self.is_tagged = bool(TAG in attrs or POS in attrs)
-
         return self
 
     def to_bytes(self):

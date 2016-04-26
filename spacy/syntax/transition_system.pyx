@@ -53,6 +53,7 @@ cdef class TransitionSystem:
     cdef int finalize_state(self, StateC* state) nogil:
         pass
 
+
     cdef int preprocess_gold(self, GoldParse gold) except -1:
         raise NotImplementedError
 
@@ -61,6 +62,9 @@ cdef class TransitionSystem:
 
     cdef Transition init_transition(self, int clas, int move, int label) except *:
         raise NotImplementedError
+
+    def set_annotations(self, StateClass stcls, doc):
+        pass
 
     def is_valid(self, StateClass stcls, move_name):
         action = self.lookup_transition(move_name)

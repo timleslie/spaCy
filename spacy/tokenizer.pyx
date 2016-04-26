@@ -43,10 +43,7 @@ cdef class Tokenizer:
 
     @classmethod
     def load(cls, data_dir, Vocab vocab):
-        return cls.from_package(get_package(data_dir), vocab=vocab)
-
-    @classmethod
-    def from_package(cls, package, Vocab vocab):
+        package = get_package(data_dir)
         rules, prefix_re, suffix_re, infix_re = read_lang_data(package)
         prefix_re = re.compile(prefix_re)
         suffix_re = re.compile(suffix_re)
@@ -283,7 +280,22 @@ cdef class Tokenizer:
         cached = <_Cached*>self.mem.alloc(1, sizeof(_Cached))
         cached.length = len(substrings)
         cached.is_lex = False
-        cached.data.tokens = self.vocab.make_fused_token(substrings)
+        cdef int i
+        cached.data.tokens = <TokenC*>self.vocab.mem.alloc(cached.length + 1, sizeof(TokenC))
+        # TODO: Unlike previous versions, the specials.json properties now have
+        # to be fully populated. Haven't made sure the data is correct yet!
+        cdef TokenC* token
+        for i, props in enumerate(substrings):
+            token = &cached.data.tokens[i]
+            # Set the special tokens up to have morphology and lemmas if
+            # specified, otherwise use the part-of-speech tag (if specified)
+            token.lex = <LexemeC*>self.vocab.get(self.mem, props['F'])
+            if 'pos' in props:
+                token.pos = self.vocab.strings[props['pos']]
+            if 'tag' in props:
+                token.tag = self.vocab.strings[props['tag']]
+            if 'L' in props:
+                token.lemma = self.vocab.strings[props['L']]
         key = hash_string(chunk)
         self._specials.set(key, cached)
         self._cache.set(key, cached)

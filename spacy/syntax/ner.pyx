@@ -70,6 +70,9 @@ cdef class BiluoPushDown(TransitionSystem):
         def __get__(self):
             return (BEGIN, IN, LAST, UNIT, OUT)
 
+    def set_annotations(self, StateClass stcls, doc):
+        pass
+
     def move_name(self, int move, int label):
         if move == OUT:
             return 'O'

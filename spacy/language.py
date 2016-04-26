@@ -25,12 +25,14 @@ from .attrs import TAG, DEP, ENT_IOB, ENT_TYPE, HEAD
 class Language(object):
     lang = None
 
+    Morphology = morphology.Morphology
     Vocab = vocab.Vocab
+    Vectors = vectors.Vectors
+
     Tokenizer = tokenizer.Tokenizer
-    Parser = syntax.parser.ParserFactory(ArcEager, {0: {'ROOT': True}})
-    Entity = syntax.parser.ParserFactory(BiluoPushdown,
-                {0: {'PER': True, 'LOC': True, 'ORG': True, 'MISC': True}})
     Tagger = tagger.Tagger
+    Parser = syntax.parser.ParserFactory(ArcEager, set_parse)
+    Entity = syntax.parser.ParserFactory(BiluoPushdown, set_entity)
     Matcher = matcher.Matcher
 
     lex_attrs = {
@@ -70,7 +72,7 @@ class Language(object):
         matcher=None,
         serializer=None,
         package=None,
-        vectors_package=None):
+        vectors=None):
         """
         A model can be specified:
 
@@ -98,8 +100,7 @@ class Language(object):
         if vocab in (None, True):
             vocab = self.Vocab.load(
                         package.cd('vocab'),
-                        get_lex_attr=get_lex_attr,
-                        vectors=vectors_package)
+                        get_lex_attr=get_lex_attr)
         self.vocab = vocab
         if tokenizer in (None, True):
             tokenizer = self.Tokenizer.load(package.cd('tokenizer'), self.vocab)
