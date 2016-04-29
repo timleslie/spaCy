@@ -28,12 +28,7 @@ class Language(object):
     Morphology = morphology.Morphology
     Vocab = vocab.Vocab
     Vectors = vectors.Vectors
-
     Tokenizer = tokenizer.Tokenizer
-    Tagger = tagger.Tagger
-    Parser = syntax.parser.ParserFactory(ArcEager, set_parse)
-    Entity = syntax.parser.ParserFactory(BiluoPushdown, set_entity)
-    Matcher = matcher.Matcher
 
     lex_attrs = {
         attrs.LOWER: orth.lower,
@@ -71,7 +66,6 @@ class Language(object):
         entity=None,
         matcher=None,
         serializer=None,
-        package=None,
         vectors=None):
         """
         A model can be specified:
@@ -91,44 +85,33 @@ class Language(object):
             - spacy.load('en_default', via='/my/package/root')
             - spacy.load('en_default==1.0.0', via='/my/package/root')
         """
-        if package is None:
-            if data_dir is None:
-                package = util.get_package_by_name(about.__models__[self.lang])
-            else:
-                package = util.get_package(data_dir)
+        if data_dir is None:
+            data_dir = util.get_package_by_name(about.__models__[self.lang])
 
-        if vocab in (None, True):
-            vocab = self.Vocab.load(
-                        package.cd('vocab'),
-                        get_lex_attr=get_lex_attr)
-        self.vocab = vocab
-        if tokenizer in (None, True):
-            tokenizer = self.Tokenizer.load(package.cd('tokenizer'), self.vocab)
-        self.tokenizer = tokenizer
-        if tagger in (None, True):
-            tagger = self.Tagger.load(package.cd('tagger'), self.vocab)
-        self.tagger = tagger
-        if entity in (None, True):
-            entity = self.Entity.load(package.cd('entity'), self.vocab)
-        self.entity = entity
-        if parser in (None, True):
-            parser = self.Parser.load(package.cd('parser'), self.vocab)
-        self.parser = parser
-        if matcher in (None, True):
-            matcher = self.Matcher.load(package.cd('matcher'), self.vocab)
-        self.matcher = matcher
+        self.vocab = self.load_vocab(data_dir / 'vocab', given=vocab)
+        self.tokenizer = self.load_tokenizer(data_dir / 'tokenizer', given=tokenizer)
+        self.tagger = self.load_tagger(data_dir / 'tagger', given=tagger)
+        self.entity = self.load_entity(data_dir / 'entity', given=entity)
+        self.parser = self.load_parser(data_dir / 'parser', given=parser)
+        self.matcher = self.load_matcher(data_dir / 'matcher', given=matcher)
 
-    def __reduce__(self):
-        args = (
-            None, # data_dir
-            self.vocab,
-            self.tokenizer,
-            self.tagger,
-            self.parser,
-            self.entity,
-            self.matcher
-        )
-        return (self.__class__, args, None, None)
+    def load_vocab(self, data_dir, given=None):
+        return self.Vocab.load(data_dir) if given in (None, True) else given
+
+    def load_tokenizer(self, data_dir, given=None):
+        return self.Tokenizer.load(self.vocab, data_dir) if given in (None, True) else given
+
+    def load_tagger(self, data_dir, given=None):
+        return self.Tagger.load(self.vocab, data_dir) if given in (None, True) else given
+
+    def load_parser(self, data_dir, given=None):
+        return self.Parser.load(self.vocab, data_dir) if given in (None, True) else given
+    
+    def load_entity(self, data_dir, given=None):
+        return self.Entity.load(self.vocab, data_dir) if given in (None, True) else given
+    
+    def load_matcher(self, data_dir, given=None):
+        return self.Matcher.load(self.vocab, data_dir) if given in (None, True) else given
 
     def __call__(self, text, tag=True, parse=True, entity=True):
         """Apply the pipeline to some text.  The text can span multiple sentences,
@@ -148,6 +131,7 @@ class Language(object):
         ('An', 'NN')
         """
         tokens = self.tokenizer(text)
+
         if self.tagger and tag:
             self.tagger(tokens)
         if self.matcher and entity:
