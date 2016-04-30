@@ -36,6 +36,7 @@ cdef class TransitionSystem:
     cdef readonly int n_moves
     cdef int _size
     cdef public int root_label
+    cdef public projectivize
     cdef public freqs
 
     cdef int initialize_state(self, StateC* state) nogil

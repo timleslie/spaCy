@@ -6,11 +6,11 @@ from libc.stdint cimport int32_t
 from libc.stdint cimport uint64_t
 
 import bz2
-from os import path
 import io
 import math
 import json
 import tempfile
+import pathlib
 
 from .lexeme cimport EMPTY_LEXEME
 from .lexeme cimport Lexeme
@@ -48,11 +48,11 @@ cdef class Vocab:
     '''
     @classmethod
     def load(cls, data_dir, get_lex_attr=None):
+        data_dir = pathlib.Path(data_dir)
         self = cls(get_lex_attr)
-        package = get_package(data_dir)
-        with package.open(('strings.json',)) as file_:
+        with (data_dir / 'strings.json').open() as file_:
             self.strings.load(file_)
-        self.load_lexemes(package.file_path(('lexemes.bin',)))
+        self.load_lexemes(data_dir / 'lexemes.bin')
         return self
 
     def __init__(self, get_lex_attr=None):
@@ -72,12 +72,12 @@ cdef class Vocab:
         
         self.length = 1
 
-    property lang:
-        def __get__(self):
-            langfunc = None
-            if self.get_lex_attr:
-                langfunc = self.get_lex_attr.get(LANG, None)
-            return langfunc('_') if langfunc else ''
+    @property
+    def lang(self):
+        if not self.get_lex_attr or LANG not in self.get_lex_attr:
+            return ''
+        else:
+            return self.get_lex_attr[LANG]('_')
 
     def __len__(self):
         """The current number of lexemes stored."""
@@ -123,7 +123,7 @@ cdef class Vocab:
         lex.orth = self.strings[string]
         lex.length = len(string)
         lex.id = self.length
-        lex.vector = <float*>mem.alloc(self.vectors_length, sizeof(float))
+        #lex.vector = <float*>mem.alloc(self.vectors_length, sizeof(float))
         if self.get_lex_attr is not None:
             for attr, func in self.get_lex_attr.items():
                 value = func(string)
@@ -180,9 +180,10 @@ cdef class Vocab:
         return Lexeme(self, orth)
    
     def dump(self, loc):
-        if path.exists(loc):
-            assert not path.isdir(loc)
-        cdef bytes bytes_loc = loc.encode('utf8') if type(loc) == unicode else loc
+        loc = pathlib.Path(loc)
+        if loc.exists():
+            assert not loc.is_dir()
+        cdef bytes bytes_loc = str(loc).encode('utf8') if type(loc) == unicode else loc
 
         cdef CFile fp = CFile(bytes_loc, 'wb')
         cdef size_t st
@@ -208,9 +209,10 @@ cdef class Vocab:
         fp.close()
 
     def load_lexemes(self, loc):
-        if not path.exists(loc):
+        loc = pathlib.Path(loc)
+        if not loc.exists():
             raise IOError('LexemeCs file not found at %s' % loc)
-        fp = CFile(loc, 'rb')
+        fp = CFile(str(loc), 'rb')
         cdef LexemeC* lexeme
         cdef hash_t key
         cdef unicode py_str

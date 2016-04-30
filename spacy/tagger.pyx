@@ -1,6 +1,8 @@
 import json
 from os import path
 from collections import defaultdict
+import pathlib
+
 from libc.string cimport memset
 
 from cymem.cymem cimport Pool
@@ -140,19 +142,12 @@ cdef class Tagger:
     )
 
     @classmethod
-    def blank(cls, vocab, templates=None):
-        if templates is None:
-            templates = cls.templates
-        model = TaggerModel(templates)
-        return cls(vocab, model)
-
-    @classmethod
     def load(cls, data_dir, vocab):
-        package = get_package(data_dir)
-        package.load_json(('pos', 'templates.json'), default=cls.templates)
-        model = TaggerModel(cls.templates)
-        if package.has_file('pos', 'model'):
-            model.load(package.file_path('pos', 'model'))
+        data_dir = pathlib.Path(data_dir)
+        with (data_dir / 'templates.json').open() as file_:
+            templates = json.load(file_)
+        model = TaggerModel(templates)
+        model.load(str(data_dir / 'model'))
         return cls(vocab, model)
 
     def __init__(self, Vocab vocab, TaggerModel model):
@@ -161,23 +156,9 @@ cdef class Tagger:
         
         # TODO: Move this to tag map
         self.freqs = {TAG: defaultdict(int)}
-        for tag in self.tag_names:
-            self.freqs[TAG][self.vocab.strings[tag]] = 1
+        #for tag in self.vocab.morphology.tag_names:
+        #    self.freqs[TAG][self.vocab.strings[tag]] = 1
         self.freqs[TAG][0] = 1
-
-    @property
-    def tag_names(self):
-        return self.vocab.morphology.tag_names
-
-    def __reduce__(self):
-        return (self.__class__, (self.vocab, self.model), None, None)
-
-    def tag_from_strings(self, Doc tokens, object tag_strs):
-        cdef int i
-        for i in range(tokens.length):
-            self.vocab.morphology.assign_tag(&tokens.c[i], tag_strs[i])
-        tokens.is_tagged = True
-        tokens._py_tokens = [None] * tokens.length
 
     def __call__(self, Doc tokens):
         """Apply the tagger, setting the POS tags onto the Doc object.
@@ -195,15 +176,13 @@ cdef class Tagger:
                                   nr_class=self.vocab.morphology.n_tags,
                                   nr_feat=self.model.nr_feat)
         for i in range(tokens.length):
-            if tokens.c[i].pos == 0:                
+            if tokens.c[i].pos == 0:
                 self.model.set_featuresC(&eg.c, tokens.c, i)
                 self.model.set_scoresC(eg.c.scores,
                     eg.c.features, eg.c.nr_feat)
-                guess = VecVec.arg_max_if_true(eg.c.scores, eg.c.is_valid, eg.c.nr_class)
-                self.vocab.morphology.assign_tag(&tokens.c[i], guess)
+                tokens.set_tag(i, eg.guess)
                 eg.fill_scores(0, eg.c.nr_class)
-        tokens.is_tagged = True
-        tokens._py_tokens = [None] * tokens.length
+        tokens.finalize_tags()
 
     def pipe(self, stream, batch_size=1000, n_threads=2):
         for doc in stream:
@@ -212,12 +191,13 @@ cdef class Tagger:
     
     def train(self, Doc tokens, object gold_tag_strs):
         assert len(tokens) == len(gold_tag_strs)
+        tag_names = self.vocab.morphology.tag_names
         for tag in gold_tag_strs:
-            if tag != None and tag not in self.tag_names:
+            if tag != None and tag not in tag_names:
                 msg = ("Unrecognized gold tag: %s. tag_map.json must contain all"
                        "gold tags, to maintain coarse-grained mapping.")
                 raise ValueError(msg % tag)
-        golds = [self.tag_names.index(g) if g is not None else -1 for g in gold_tag_strs]
+        golds = [tag_names.index(g) if g is not None else -1 for g in gold_tag_strs]
         cdef int correct = 0
         cdef Pool mem = Pool()
         cdef Example eg = Example(
@@ -231,12 +211,11 @@ cdef class Tagger:
                 eg.c.features, eg.c.nr_feat)
             self.model.updateC(&eg.c)
 
-            self.vocab.morphology.assign_tag(&tokens.c[i], eg.guess)
+            tokens.set_tag(i, eg.guess)
             
             correct += eg.cost == 0
             self.freqs[TAG][tokens.c[i].tag] += 1
             eg.fill_scores(0, eg.c.nr_class)
             eg.fill_costs(0, eg.c.nr_class)
-        tokens.is_tagged = True
-        tokens._py_tokens = [None] * tokens.length
+        tokens.finish_tagging()
         return correct

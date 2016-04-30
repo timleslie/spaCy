@@ -1,7 +1,7 @@
 # cython: profile=True
 from __future__ import unicode_literals
 
-from os import path
+import pathlib
 
 from .typedefs cimport attr_t
 from .typedefs cimport hash_t
@@ -155,12 +155,10 @@ cdef class Matcher:
     cdef object _patterns
 
     @classmethod
-    def load(cls, data_dir, Vocab vocab):
-        return cls.from_package(get_package(data_dir), vocab=vocab)
-
-    @classmethod
-    def from_package(cls, package, Vocab vocab):
-        patterns = package.load_json(('vocab', 'gazetteer.json'))
+    def load(cls, gazetteer_loc, Vocab vocab):
+        gazetteer_loc = pathlib.Path(gazetteer_loc)
+        with gazetteer_loc.open() as file_:
+            patterns = json.load(file_)
         return cls(vocab, patterns)
 
     def __init__(self, vocab, patterns={}):

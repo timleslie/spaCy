@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from os import path
 from warnings import warn
 import io
+import pathlib
 
 try:
     import ujson as json
@@ -11,6 +12,8 @@ except ImportError:
 from .tokenizer import Tokenizer
 from .vocab import Vocab
 from .syntax.parser import Parser
+from .syntax.arc_eager import ArcEager
+from .syntax.ner import BiluoPushDown
 from .tagger import Tagger
 from .matcher import Matcher
 from .serialize.packer import Packer
@@ -25,46 +28,14 @@ from .attrs import TAG, DEP, ENT_IOB, ENT_TYPE, HEAD
 class Language(object):
     lang = None
 
-    Morphology = morphology.Morphology
-    Vocab = vocab.Vocab
-    Vectors = vectors.Vectors
-    Tokenizer = tokenizer.Tokenizer
-
-    lex_attrs = {
-        attrs.LOWER: orth.lower,
-        attrs.NORM: orth.norm,
-        attrs.SHAPE: orth.word_shape,
-        attrs.PREFIX: orth.prefix,
-        attrs.SUFFIX: orth.suffix,
-        attrs.CLUSTER: orth.cluster,
-        attrs.PROB: lambda string: -20,
-        attrs.IS_ALPHA: orth.is_alpha,
-        attrs.IS_ASCII: orth.is_ascii,
-        attrs.IS_DIGIT: cls.is_digit,
-        attrs.IS_LOWER: orth.is_lower,
-        attrs.IS_PUNCT: orth.is_punct,
-        attrs.IS_SPACE: orth.is_space,
-        attrs.IS_TITLE: orth.is_title,
-        attrs.IS_UPPER: orth.is_upper,
-        attrs.IS_BRACKET: orth.is_bracket,
-        attrs.IS_QUOTE: orth.is_quote,
-        attrs.IS_LEFT_PUNCT: orth.is_left_punct,
-        attrs.IS_RIGHT_PUNCT: orth.is_right_punct,
-        attrs.LIKE_URL: orth.like_url,
-        attrs.LIKE_NUM: orth.like_number,
-        attrs.LIKE_EMAIL: orth.like_email,
-        attrs.IS_STOP: lambda string: False,
-        attrs.IS_OOV: lambda string: True
-    }
-    
     def __init__(self,
         data_dir=None,
         vocab=None,
         tokenizer=None,
         tagger=None,
+        matcher=None,
         parser=None,
         entity=None,
-        matcher=None,
         serializer=None,
         vectors=None):
         """
@@ -87,31 +58,44 @@ class Language(object):
         """
         if data_dir is None:
             data_dir = util.get_package_by_name(about.__models__[self.lang])
+        data_dir = pathlib.Path(data_dir)
 
-        self.vocab = self.load_vocab(data_dir / 'vocab', given=vocab)
-        self.tokenizer = self.load_tokenizer(data_dir / 'tokenizer', given=tokenizer)
-        self.tagger = self.load_tagger(data_dir / 'tagger', given=tagger)
-        self.entity = self.load_entity(data_dir / 'entity', given=entity)
-        self.parser = self.load_parser(data_dir / 'parser', given=parser)
-        self.matcher = self.load_matcher(data_dir / 'matcher', given=matcher)
+        self.vocab = self.load_vocab(data_dir, given=vocab)
+        self.tokenizer = self.load_tokenizer(data_dir, given=tokenizer)
+        self.tagger = self.load_tagger(data_dir, given=tagger)
+        self.matcher = self.load_matcher(data_dir, given=matcher)
+        self.entity = self.load_entity(data_dir, given=entity)
+        self.parser = self.load_parser(data_dir, given=parser)
 
     def load_vocab(self, data_dir, given=None):
-        return self.Vocab.load(data_dir) if given in (None, True) else given
+        data_dir = pathlib.Path(data_dir) / 'vocab'
+        return Vocab.load(data_dir) if given in (None, True) else given
 
     def load_tokenizer(self, data_dir, given=None):
-        return self.Tokenizer.load(self.vocab, data_dir) if given in (None, True) else given
+        data_dir = pathlib.Path(data_dir) / 'tokenizer'
+        return Tokenizer.load(data_dir, self.vocab) if given in (None, True) else given
 
     def load_tagger(self, data_dir, given=None):
-        return self.Tagger.load(self.vocab, data_dir) if given in (None, True) else given
+        data_dir = pathlib.Path(data_dir) / 'pos'
+        return Tagger.load(data_dir, self.vocab) if given in (None, True) else given
 
     def load_parser(self, data_dir, given=None):
-        return self.Parser.load(self.vocab, data_dir) if given in (None, True) else given
+        data_dir = pathlib.Path(data_dir) / 'deps'
+        if given in (None, True):
+            return Parser.load(data_dir, self.vocab.strings, ArcEager)
+        else:
+            return given
     
     def load_entity(self, data_dir, given=None):
-        return self.Entity.load(self.vocab, data_dir) if given in (None, True) else given
+        data_dir = pathlib.Path(data_dir) / 'ner'
+        if given in (None, True):
+            return Parser.load(data_dir, self.vocab.strings, BiluoPushDown)
+        else:
+            return given
     
     def load_matcher(self, data_dir, given=None):
-        return self.Matcher.load(self.vocab, data_dir) if given in (None, True) else given
+        loc = pathlib.Path(data_dir) / 'vocab' / 'gazetteer.json'
+        return Matcher.load(loc, self.vocab) if given in (None, True) else given
 
     def __call__(self, text, tag=True, parse=True, entity=True):
         """Apply the pipeline to some text.  The text can span multiple sentences,
@@ -208,7 +192,6 @@ class Language(object):
                     (ENT_TYPE, entity_type_freqs),
                     (HEAD, head_freqs)
                 ]))
-
 
 #
 #    @classmethod

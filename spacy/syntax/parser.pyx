@@ -12,12 +12,11 @@ from cpython.exc cimport PyErr_CheckSignals
 from libc.stdint cimport uint32_t, uint64_t
 from libc.string cimport memset, memcpy
 from libc.stdlib cimport malloc, calloc, free
-import os.path
-from os import path
 import shutil
 import json
 import sys
 from .nonproj import PseudoProjectivity
+import pathlib
 
 from cymem.cymem cimport Pool, Address
 from murmurhash.mrmr cimport hash64
@@ -46,8 +45,6 @@ from ._parse_features cimport CONTEXT_SIZE
 from ._parse_features cimport fill_context
 from .stateclass cimport StateClass
 from ._state cimport StateC
-
-from spacy.syntax.iterators cimport CHUNKERS, DocIterator, EnglishNounChunks, GermanNounChunks
 
 
 DEBUG = False
@@ -86,16 +83,18 @@ cdef class Parser:
 
     @classmethod
     def load(cls, data_dir, strings, transition_system):
-        if not os.path.exists(model_dir):
-            print >> sys.stderr, "Warning: No model found at", model_dir
-        elif not os.path.isdir(model_dir):
-            print >> sys.stderr, "Warning: model path:", model_dir, "is not a directory"
-        cfg = Config.read(model_dir, 'config')
-        moves = transition_system(strings, cfg.labels, cfg.get('projectivize', False))
+        data_dir = pathlib.Path(data_dir)
+        if not data_dir.exists():
+            print >> sys.stderr, "Warning: No model found at", data_dir
+        elif not data_dir.is_dir():
+            print >> sys.stderr, "Warning: model path:", data_dir, "is not a directory"
+        cfg = Config.read(data_dir, 'config')
+        moves = transition_system(strings, cfg.labels,
+                                  projectivize=cfg.get('projectivize', False))
         templates = get_templates(cfg.features)
         model = ParserModel(templates)
-        if path.exists(path.join(model_dir, 'model')):
-            model.load(path.join(model_dir, 'model'))
+        if (data_dir / 'model').exists():
+            model.load(str(data_dir / 'model'))
         return cls(strings, moves, model)
 
     def __reduce__(self):
@@ -292,7 +291,9 @@ cdef class StepwiseState:
     def finish(self):
         if self.stcls.is_final():
             self.parser.moves.finalize_state(self.stcls.c)
-        self.doc.set_parse(self.stcls.c._sent)
+        for i in range(self.doc.length):
+            self.doc.c[i] = self.stcls.c._sent[i]
+        self.moves.finalize_doc(self.doc)
 
 
 cdef int _arg_max_clas(const weight_t* scores, int move, const Transition* actions,

@@ -1,5 +1,5 @@
-from os import path
 import json
+import pathlib
 
 class Config(object):
     def __init__(self, **kwargs):
@@ -11,8 +11,12 @@ class Config(object):
 
     @classmethod
     def write(cls, model_dir, name, **kwargs):
-        open(path.join(model_dir, '%s.json' % name), 'w').write(json.dumps(kwargs))
+        model_dir = pathlib.Path(model_dir)
+        with (model_dir / ('%s.json' % name)).open('w') as file_:
+            file_.write(json.dumps(kwargs))
 
     @classmethod
     def read(cls, model_dir, name):
-        return cls(**json.load(open(path.join(model_dir, '%s.json' % name))))
+        model_dir = pathlib.Path(model_dir)
+        with (model_dir / ('%s.json' % name)).open() as file_:
+            return cls(**json.load(file_))

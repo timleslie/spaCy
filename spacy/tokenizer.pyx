@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from os import path
 import re
+import pathlib
+import ujson as json
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as preinc
@@ -16,7 +18,6 @@ cimport cython
 
 from . import util
 from .tokens.doc cimport Doc
-from .util import read_lang_data, get_package
 
 
 cdef class Tokenizer:
@@ -32,23 +33,24 @@ cdef class Tokenizer:
         for chunk, substrings in sorted(rules.items()):
             self.add_special_case(chunk, substrings)
 
-    def __reduce__(self):
-        args = (self.vocab, 
-                self._rules, 
-                self._prefix_re, 
-                self._suffix_re, 
-                self._infix_re)
-
-        return (self.__class__, args, None, None)
-
     @classmethod
     def load(cls, data_dir, Vocab vocab):
-        package = get_package(data_dir)
-        rules, prefix_re, suffix_re, infix_re = read_lang_data(package)
-        prefix_re = re.compile(prefix_re)
-        suffix_re = re.compile(suffix_re)
-        infix_re = re.compile(infix_re)
-        return cls(vocab, rules, prefix_re, suffix_re, infix_re)
+        data_dir = pathlib.Path(data_dir)
+        with (data_dir / 'specials.json').open() as file_:
+            specials = json.load(file_)
+        with (data_dir / 'prefix.txt').open() as file_:
+            entries = file_.read().split('\n')
+            pieces = ['^' + re.escape(piece) for piece in entries if piece.strip()]
+            prefix_re = re.compile('|'.join(pieces))
+        with (data_dir / 'suffix.txt').open() as file_:
+            entries = file_.read().split('\n')
+            pieces = [piece + '$' for piece in entries if piece.strip()]
+            suffix_re = re.compile('|'.join(pieces))
+        with (data_dir / 'infix.txt').open() as file_:
+            entries = file_.read().split('\n')
+            pieces = [piece for piece in entries if piece.strip()]
+            infix_re = re.compile('|'.join(pieces))
+        return cls(vocab, specials, prefix_re, suffix_re, infix_re)
 
     cpdef Doc tokens_from_list(self, list strings):
         cdef Doc tokens = Doc(self.vocab)
@@ -281,21 +283,21 @@ cdef class Tokenizer:
         cached.length = len(substrings)
         cached.is_lex = False
         cdef int i
-        cached.data.tokens = <TokenC*>self.vocab.mem.alloc(cached.length + 1, sizeof(TokenC))
+        tokens = <TokenC*>self.vocab.mem.alloc(cached.length + 1, sizeof(TokenC))
         # TODO: Unlike previous versions, the specials.json properties now have
         # to be fully populated. Haven't made sure the data is correct yet!
         cdef TokenC* token
         for i, props in enumerate(substrings):
-            token = &cached.data.tokens[i]
             # Set the special tokens up to have morphology and lemmas if
             # specified, otherwise use the part-of-speech tag (if specified)
-            token.lex = <LexemeC*>self.vocab.get(self.mem, props['F'])
+            tokens[i].lex = <LexemeC*>self.vocab.get(self.mem, props['F'])
             if 'pos' in props:
-                token.pos = self.vocab.strings[props['pos']]
+                tokens[i].pos = self.vocab.strings[props['pos']]
             if 'tag' in props:
-                token.tag = self.vocab.strings[props['tag']]
+                tokens[i].tag = self.vocab.strings[props['tag']]
             if 'L' in props:
-                token.lemma = self.vocab.strings[props['L']]
+                tokens[i].lemma = self.vocab.strings[props['L']]
+        cached.data.tokens = tokens
         key = hash_string(chunk)
         self._specials.set(key, cached)
         self._cache.set(key, cached)

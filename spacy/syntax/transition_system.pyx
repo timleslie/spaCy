@@ -15,9 +15,11 @@ class OracleError(Exception):
 
 
 cdef class TransitionSystem:
-    def __init__(self, StringStore string_table, dict labels_by_action, _freqs=None):
+    def __init__(self, StringStore string_table, dict labels_by_action,
+                 projectivize=False, _freqs=None):
         self.mem = Pool()
         self.strings = string_table
+        self.projectivize = projectivize
         self.n_moves = 0
         self._size = 100
         

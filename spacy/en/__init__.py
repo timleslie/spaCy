@@ -36,5 +36,5 @@ STOPWORDS = set(w for w in STOPWORDS.split() if w)
 class English(Language):
     lang = 'en'
 
-    lex_attrs = dict(Language.lex_attrs)
-    lex_attrs[attrs.IS_STOP] = lambda string: 1 if string.lower() in STOPWORDS else 0
+    #lex_attrs = dict(Language.lex_attrs)
+    #lex_attrs[attrs.IS_STOP] = lambda string: 1 if string.lower() in STOPWORDS else 0
