@@ -82,7 +82,6 @@ cdef class Doc:
         self.is_parsed = False
         self._py_tokens = []
         self._vector = None
-        self.noun_chunks_iterator = None
 
     def __getitem__(self, object i):
         """Get a Token or a Span from the Doc.
@@ -233,21 +232,18 @@ cdef class Doc:
                     # Set start as B
                     self.c[start].ent_iob = 3
 
-    property noun_chunks:
-        def __get__(self):
-            """Yield spans for base noun phrases."""
-            if not self.is_parsed:
-                raise ValueError(
-                    "noun_chunks requires the dependency parse, which "
-                    "requires data to be installed. If you haven't done so, run: "
-                    "\npython -m spacy.%s.download all\n"
-                    "to install the data" % self.vocab.lang)
-
-            for start, end, label in self.noun_chunks_iterator(self):
-                yield Span(self, start, end, label=label)
-
-        def __set__(self, iterator):            
-            self.noun_chunks_iterator = iterator
+    @property
+    def noun_chunks(self):
+        """Yield spans for base noun phrases."""
+        if not self.is_parsed:
+            raise ValueError(
+                "noun_chunks requires the dependency parse, which "
+                "requires data to be installed. If you haven't done so, run: "
+                "\npython -m spacy.%s.download all\n"
+                "to install the data" % self.vocab.lang)
+        iterator = CHUNKERS.get(self.vocab.lang)
+        for start, end, label in iterator(self):
+            yield Span(self, start, end, label=label)
 
     @property
     def sents(self):
@@ -364,16 +360,6 @@ cdef class Doc:
         for i in range(self.length, self.max_length + PADDING):
             self.c[i].lex = &EMPTY_LEXEME
 
-    def finalize_parse(self, noun_chunk_iterator=None):
-        self.is_parsed = True
-        set_children_from_heads(self.c, self.length)
-        if noun_chunk_iterator is None:
-            noun_chunk_iterator = CHUNKERS.get(self.vocab.lang)
-        self.noun_chunks = noun_chunk_iterator
-
-    cdef void set_tag(self, int i, int tag) nogil:
-        pass
-
     def from_array(self, attrs, array):
         cdef int i, col
         cdef attr_id_t attr_id
@@ -391,7 +377,7 @@ cdef class Doc:
                         tokens[i + values[i]].r_kids += 1
             elif attr_id == TAG:
                 for i in range(length):
-                    self.set_tag(i, self.vocab.morphology.reverse_index[values[i]])
+                    self.vocab.morphology.assign_tag(self.c[i], values[i]])
             elif attr_id == POS:
                 for i in range(length):
                     tokens[i].pos = <univ_pos_t>values[i]
@@ -406,9 +392,10 @@ cdef class Doc:
                     tokens[i].ent_type = values[i]
             else:
                 raise ValueError("Unknown attribute ID: %d" % attr_id)
-        if HEAD in attrs or DEP in attrs:
-            self.finalize_parse(False)
         self.is_tagged = bool(TAG in attrs or POS in attrs)
+        if HEAD in attrs or DEP in attrs:
+            set_children_from_heads(self.c, self.length)
+            self.is_parsed = True
         return self
 
     def to_bytes(self):
