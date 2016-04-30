@@ -32,70 +32,54 @@ class Language(object):
         data_dir=None,
         vocab=None,
         tokenizer=None,
-        tagger=None,
-        matcher=None,
-        parser=None,
-        entity=None,
-        serializer=None,
+        pipeline=None,
         vectors=None):
-        """
-        A model can be specified:
-
-        1) by calling a Language subclass
-            - spacy.en.English()
-
-        2) by calling a Language subclass with data_dir
-            - spacy.en.English('my/model/root')
-            - spacy.en.English(data_dir='my/model/root')
-
-        3) by package name
-            - spacy.load('en_default')
-            - spacy.load('en_default==1.0.0')
-
-        4) by package name with a relocated package base
-            - spacy.load('en_default', via='/my/package/root')
-            - spacy.load('en_default==1.0.0', via='/my/package/root')
-        """
+        '''
+        Create a text-processing pipeline
+        '''
         if data_dir is None:
             data_dir = util.get_package_by_name(about.__models__[self.lang])
         data_dir = pathlib.Path(data_dir)
 
-        self.vocab = self.load_vocab(data_dir, given=vocab)
-        self.tokenizer = self.load_tokenizer(data_dir, given=tokenizer)
-        self.tagger = self.load_tagger(data_dir, given=tagger)
-        self.matcher = self.load_matcher(data_dir, given=matcher)
-        self.entity = self.load_entity(data_dir, given=entity)
-        self.parser = self.load_parser(data_dir, given=parser)
+        self.vectors = self.load_vectors(data_dir) if vectors in (None, True) else vectors
+        self.vocab = self.load_vocab(data_dir) if vocab in (None, True) else vocab
+        self.tokenizer = self.load_tokenizer(data_dir) \
+                            if tokenizer in (None, True) else tokenizer
+        self.pipeline = self.load_pipeline(data_dir) \
+                            if pipeline in (None, True) else pipeline
 
-    def load_vocab(self, data_dir, given=None):
+    def load_vectors(self, data_dir):
+        data_dir = pathlib.Path(data_dir) / 'vectors'
+        return VectorStore.load(data_dir)
+
+    def load_vocab(self, data_dir):
         data_dir = pathlib.Path(data_dir) / 'vocab'
-        return Vocab.load(data_dir) if given in (None, True) else given
-
-    def load_tokenizer(self, data_dir, given=None):
+        return Vocab.load(data_dir, self.vectors)
+    
+    def load_tokenizer(self, data_dir):
         data_dir = pathlib.Path(data_dir) / 'tokenizer'
-        return Tokenizer.load(data_dir, self.vocab) if given in (None, True) else given
+        return Tokenizer.load(data_dir, self.vocab)
 
-    def load_tagger(self, data_dir, given=None):
+    def load_pipeline(self, data_dir):
+        data_dir = pathlib.Path(data_dir)
+        return (self.load_tagger(data_dir), self.load_matcher(data_dir),
+                self.load_parser(data_dir), self.load_entity(data_dir))
+
+    def load_tagger(self, data_dir):
         data_dir = pathlib.Path(data_dir) / 'pos'
-        return Tagger.load(data_dir, self.vocab) if given in (None, True) else given
+        return Tagger.load(data_dir, self.vocab)
 
-    def load_parser(self, data_dir, given=None):
+    def load_parser(self, data_dir):
         data_dir = pathlib.Path(data_dir) / 'deps'
-        if given in (None, True):
-            return Parser.load(data_dir, self.vocab.strings, ArcEager)
-        else:
-            return given
+        return Parser.load(data_dir, self.vocab.strings, ArcEager)
     
-    def load_entity(self, data_dir, given=None):
+    def load_entity(self, data_dir):
         data_dir = pathlib.Path(data_dir) / 'ner'
-        if given in (None, True):
-            return Parser.load(data_dir, self.vocab.strings, BiluoPushDown)
-        else:
-            return given
+        return Parser.load(data_dir, self.vocab.strings, BiluoPushDown)
     
-    def load_matcher(self, data_dir, given=None):
+    def load_matcher(self, data_dir):
         loc = pathlib.Path(data_dir) / 'vocab' / 'gazetteer.json'
-        return Matcher.load(loc, self.vocab) if given in (None, True) else given
+        return Matcher.load(loc, self.vocab)
 
     def __call__(self, text, tag=True, parse=True, entity=True):
         """Apply the pipeline to some text.  The text can span multiple sentences,
@@ -115,37 +99,30 @@ class Language(object):
         ('An', 'NN')
         """
         tokens = self.tokenizer(text)
-
-        if self.tagger and tag:
-            self.tagger(tokens)
-        if self.matcher and entity:
-            self.matcher(tokens)
-        if self.parser and parse:
-            self.parser(tokens)
-        if self.entity and entity:
-            # Add any of the entity labels already set, in case we don't have them.
-            for tok in tokens:
-                if tok.ent_type != 0:
-                    self.entity.add_label(tok.ent_type)
-            self.entity(tokens)
-        return tokens
+        skip = {self.tagger: not tag, self.parser: not parse, self.entity: not entity}
+        for annotator in self.pipeline:
+            if not tag and annotator is self.tagger:
+                continue
+            elif not parse and annotator is self.parser:
+                continue
+            elif not entity and annotator is self.entity:
+                continue
+            if annotator is not None:
+                annotator(tokens)
+        return annotator
 
     def pipe(self, texts, tag=True, parse=True, entity=True, n_threads=2,
             batch_size=1000):
         stream = self.tokenizer.pipe(texts,
             n_threads=n_threads, batch_size=batch_size)
-        if self.tagger and tag:
-            stream = self.tagger.pipe(stream,
-                n_threads=n_threads, batch_size=batch_size)
-        if self.matcher and entity:
-            stream = self.matcher.pipe(stream,
-                n_threads=n_threads, batch_size=batch_size)
-        if self.parser and parse:
-            stream = self.parser.pipe(stream,
-                n_threads=n_threads, batch_size=batch_size)
-        if self.entity and entity:
-            stream = self.entity.pipe(stream,
-                n_threads=1, batch_size=batch_size)
+        skip = {self.tagger: not tag, self.parser: not parse, self.entity: not entity}
+        for annotator in self.pipeline:
+            if skip.get(annotator):
+                continue
+            if hasattr(annotator, 'pipe'):
+                stream = annotator.pipe(stream, n_threads=n_threads, batch_size=batch_size)
+            else:
+                stream = (annotator(doc) for doc in stream)
         for doc in stream:
             yield doc
 
