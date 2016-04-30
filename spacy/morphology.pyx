@@ -31,9 +31,6 @@ cdef class Morphology:
             self.reverse_index[self.rich_tags[i].name] = i
         self._cache = PreshMapArray(self.n_tags)
 
-    def __reduce__(self):
-        return (Morphology, (self.strings, self.tag_map, self.lemmatizer), None, None)
-
     cdef int assign_tag(self, TokenC* token, tag) except -1:
         cdef int tag_id
         if isinstance(tag, basestring):
