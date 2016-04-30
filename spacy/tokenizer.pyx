@@ -23,6 +23,7 @@ from .tokens.doc cimport Doc
 cdef class Tokenizer:
     def __init__(self, Vocab vocab, rules, prefix_re, suffix_re, infix_re):
         self.mem = Pool()
+        self.create_doc = create_doc
         self._cache = PreshMap()
         self._specials = PreshMap()
         self._prefix_re = prefix_re
@@ -50,10 +51,13 @@ cdef class Tokenizer:
             entries = file_.read().split('\n')
             pieces = [piece for piece in entries if piece.strip()]
             infix_re = re.compile('|'.join(pieces))
-        return cls(vocab, specials, prefix_re, suffix_re, infix_re)
+        return cls(vocab, specials, prefix_re, suffix_re, infix_re, create_doc=create_doc)
+
+    def create_doc(self):
+        return Doc(self.vocab)
 
     cpdef Doc tokens_from_list(self, list strings):
-        cdef Doc tokens = Doc(self.vocab)
+        cdef Doc tokens = self.create_doc(self.vocab)
         if sum([len(s) for s in strings]) == 0:
             return tokens
         cdef unicode py_string
@@ -84,16 +88,16 @@ cdef class Tokenizer:
             string (unicode): The string to be tokenized.
 
         Returns:
-            tokens (Doc): A Doc object, giving access to a sequence of LexemeCs.
+            tokens (Doc): A Doc object, giving access to a sequence of TokenCs.
         """
         if len(string) >= (2 ** 30):
             raise ValueError(
                 "String is too long: %d characters. Max is 2**30." % len(string)
             )
         cdef int length = len(string)
-        cdef Doc tokens = Doc(self.vocab)
+        cdef Doc doc = self.create_doc(self.vocab)
         if length == 0:
-            return tokens
+            return doc
         cdef int i = 0
         cdef int start = 0
         cdef bint cache_hit
@@ -112,12 +116,12 @@ cdef class Tokenizer:
                     # we don't have to create the slice when we hit the cache.
                     span = string[start:i]
                     key = hash_string(span)
-                    cache_hit = self._try_cache(key, tokens)
+                    cache_hit = self._try_cache(key, doc)
                     if not cache_hit:
-                        self._tokenize(tokens, span, key)
+                        self._tokenize(doc, span, key)
                 in_ws = not in_ws
                 if uc == ' ':
-                    tokens.c[tokens.length - 1].spacy = True
+                    doc.c[doc.length - 1].spacy = True
                     start = i + 1
                 else:
                     start = i
@@ -126,11 +130,11 @@ cdef class Tokenizer:
         if start < i:
             span = string[start:]
             key = hash_string(span)
-            cache_hit = self._try_cache(key, tokens)
+            cache_hit = self._try_cache(key, doc)
             if not cache_hit:
-                self._tokenize(tokens, span, key)
-            tokens.c[tokens.length - 1].spacy = string[-1] == ' ' and not in_ws
-        return tokens
+                self._tokenize(doc, span, key)
+            doc.c[doc.length - 1].spacy = string[-1] == ' ' and not in_ws
+        return doc
 
     def pipe(self, texts, batch_size=1000, n_threads=2):
         for text in texts:

@@ -15,6 +15,7 @@ cdef class Tokenizer:
     cdef PreshMap _cache
     cdef PreshMap _specials
     cpdef readonly Vocab vocab
+    cdef public object create_doc
 
     cdef object _prefix_re
     cdef object _suffix_re
