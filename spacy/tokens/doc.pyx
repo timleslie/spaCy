@@ -368,30 +368,34 @@ cdef class Doc:
         cdef attr_t[:] values
         for col, attr_id in enumerate(attrs): 
             values = array[:, col]
-            if attr_id == HEAD:
-                for i in range(length):
-                    tokens[i].head = values[i]
-                    if values[i] >= 1:
-                        tokens[i + values[i]].l_kids += 1
-                    elif values[i] < 0:
-                        tokens[i + values[i]].r_kids += 1
-            elif attr_id == TAG:
-                for i in range(length):
-                    self.vocab.morphology.assign_tag(self.c[i], values[i]])
-            elif attr_id == POS:
-                for i in range(length):
-                    tokens[i].pos = <univ_pos_t>values[i]
-            elif attr_id == DEP:
-                for i in range(length):
-                    tokens[i].dep = values[i]
-            elif attr_id == ENT_IOB:
-                for i in range(length):
-                    tokens[i].ent_iob = values[i]
-            elif attr_id == ENT_TYPE:
-                for i in range(length):
-                    tokens[i].ent_type = values[i]
-            else:
-                raise ValueError("Unknown attribute ID: %d" % attr_id)
+
+            for i, value in enumerate(values):
+                Token.set_token_attr(&self.c[i], attr_id, value)
+
+            #if attr_id == HEAD:
+            #    for i in range(length):
+            #        tokens[i].head = values[i]
+            #        if values[i] >= 1:
+            #            tokens[i + values[i]].l_kids += 1
+            #        elif values[i] < 0:
+            #            tokens[i + values[i]].r_kids += 1
+            #elif attr_id == TAG:
+            #    for i in range(length):
+            #        self.vocab.morphology.assign_tag(self.c[i], values[i]])
+            #elif attr_id == POS:
+            #    for i in range(length):
+            #        tokens[i].pos = <univ_pos_t>values[i]
+            #elif attr_id == DEP:
+            #    for i in range(length):
+            #        tokens[i].dep = values[i]
+            #elif attr_id == ENT_IOB:
+            #    for i in range(length):
+            #        tokens[i].ent_iob = values[i]
+            #elif attr_id == ENT_TYPE:
+            #    for i in range(length):
+            #        tokens[i].ent_type = values[i]
+            #else:
+            #    raise ValueError("Unknown attribute ID: %d" % attr_id)
         self.is_tagged = bool(TAG in attrs or POS in attrs)
         if HEAD in attrs or DEP in attrs:
             set_children_from_heads(self.c, self.length)

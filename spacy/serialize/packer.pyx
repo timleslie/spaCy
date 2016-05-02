@@ -126,7 +126,8 @@ cdef class Packer:
         array = numpy.zeros(shape=(len(doc), len(self._codecs)), dtype=numpy.int32)
         for i, codec in enumerate(self._codecs):
             codec.decode(bits, array[:, i])
-        doc.from_array(self.attrs, array)
+        attrs, array = self.expand_attrs(self.attrs, array)
+        doc.from_array(attrs, array)
         return doc
 
     def _orth_encode(self, Doc doc):
