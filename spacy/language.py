@@ -109,7 +109,7 @@ class Language(object):
                 get_lex_attr = cls.default_lex_attrs()
         if hasattr(package, 'dir_path'):
             return Vocab.from_package(package, get_lex_attr=get_lex_attr,
-                vectors_package=vectors_package)
+                                      vectors_package=vectors_package)
         else:
             return Vocab.load(package, get_lex_attr)
 
@@ -136,17 +136,17 @@ class Language(object):
             return None
 
     def __init__(self,
-        data_dir=None,
-        vocab=None,
-        tokenizer=None,
-        tagger=None,
-        parser=None,
-        entity=None,
-        matcher=None,
-        serializer=None,
-        load_vectors=True,
-        package=None,
-        vectors_package=None):
+                 data_dir=None,
+                 vocab=None,
+                 tokenizer=None,
+                 tagger=None,
+                 parser=None,
+                 entity=None,
+                 matcher=None,
+                 serializer=None,
+                 load_vectors=True,
+                 package=None,
+                 vectors_package=None):
         """
         A model can be specified:
 
@@ -242,10 +242,10 @@ class Language(object):
         return doc
 
     def pipe(self, texts, tag=True, parse=True, entity=True, n_threads=2,
-            batch_size=1000):
+             batch_size=1000):
         skip = {self.tagger: not tag, self.parser: not parse, self.entity: not entity}
         stream = self.pipeline[0].pipe(texts,
-            n_threads=n_threads, batch_size=batch_size)
+                                       n_threads=n_threads, batch_size=batch_size)
         for proc in self.pipeline[1:]:
             if proc and not skip.get(proc):
                 if hasattr(proc, 'pipe'):

@@ -13,16 +13,12 @@ def test_overlap_issue118(EN):
     '''Test a bug that arose from having overlapping matches'''
     doc = EN.tokenizer(u'how many points did lebron james score against the boston celtics last night')
     ORG = doc.vocab.strings['ORG']
-    matcher = Matcher(EN.vocab,
-        {'BostonCeltics':
-            ('ORG', {},
-                [
-                    [{LOWER: 'celtics'}],
-                    [{LOWER: 'boston'}, {LOWER: 'celtics'}],
-                ]
-            )
-        }
-    )
+    matcher = Matcher(EN.vocab, {'BostonCeltics': ('ORG', {}, [[{LOWER: 'celtics'}],
+                                                               [{LOWER: 'boston'}, {LOWER: 'celtics'}],
+                                                               ]
+                                                   )
+                                 }
+                      )
 
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
@@ -63,16 +59,12 @@ def test_overlap_reorder(EN):
     '''Test order dependence'''
     doc = EN.tokenizer(u'how many points did lebron james score against the boston celtics last night')
     ORG = doc.vocab.strings['ORG']
-    matcher = Matcher(EN.vocab,
-        {'BostonCeltics':
-            ('ORG', {},
-                [
-                    [{LOWER: 'boston'}, {LOWER: 'celtics'}],
-                    [{LOWER: 'celtics'}],
-                ]
-            )
-        }
-    )
+    matcher = Matcher(EN.vocab, {'BostonCeltics': ('ORG', {}, [[{LOWER: 'boston'}, {LOWER: 'celtics'}],
+                                                               [{LOWER: 'celtics'}],
+                                                               ]
+                                                   )
+                                 }
+                      )
 
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
@@ -88,16 +80,12 @@ def test_overlap_prefix(EN):
     '''Test order dependence'''
     doc = EN.tokenizer(u'how many points did lebron james score against the boston celtics last night')
     ORG = doc.vocab.strings['ORG']
-    matcher = Matcher(EN.vocab,
-        {'BostonCeltics':
-            ('ORG', {},
-                [
-                    [{LOWER: 'boston'}],
-                    [{LOWER: 'boston'}, {LOWER: 'celtics'}],
-                ]
-            )
-        }
-    )
+    matcher = Matcher(EN.vocab, {'BostonCeltics': ('ORG', {}, [[{LOWER: 'boston'}],
+                                                               [{LOWER: 'boston'}, {LOWER: 'celtics'}],
+                                                               ]
+                                                   )
+                                 }
+                      )
 
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
@@ -113,16 +101,12 @@ def test_overlap_prefix_reorder(EN):
     '''Test order dependence'''
     doc = EN.tokenizer(u'how many points did lebron james score against the boston celtics last night')
     ORG = doc.vocab.strings['ORG']
-    matcher = Matcher(EN.vocab,
-        {'BostonCeltics':
-            ('ORG', {},
-                [
-                    [{LOWER: 'boston'}, {LOWER: 'celtics'}],
-                    [{LOWER: 'boston'}],
-                ]
-            )
-        }
-    )
+    matcher = Matcher(EN.vocab, {'BostonCeltics': ('ORG', {}, [[{LOWER: 'boston'}, {LOWER: 'celtics'}],
+                                                               [{LOWER: 'boston'}],
+                                                               ]
+                                                   )
+                                 }
+                      )
 
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)

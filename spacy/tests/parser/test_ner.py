@@ -30,16 +30,12 @@ def test_consistency_bug(EN):
 @pytest.mark.models
 def test_unit_end_gazetteer(EN):
     '''Test a bug in the interaction between the NER model and the gazetteer'''
-    matcher = Matcher(EN.vocab,
-        {'MemberNames':
-            ('PERSON', {},
-                [
-                    [{LOWER: 'cal'}],
-                    [{LOWER: 'cal'}, {LOWER: 'henderson'}],
-                ]
-            )
-        }
-    )
+    matcher = Matcher(EN.vocab, {'MemberNames': ('PERSON', {}, [[{LOWER: 'cal'}],
+                                                                [{LOWER: 'cal'}, {LOWER: 'henderson'}],
+                                                                ]
+                                                 )
+                                 }
+                      )
 
     doc = EN(u'who is cal the manager of?')
     if len(list(doc.ents)) == 0:

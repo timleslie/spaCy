@@ -70,9 +70,9 @@ def test_count_by(nlp):
     tokens = nlp('apple apple orange banana')
     assert tokens.count_by(attrs.ORTH) == {3699: 2, 3750: 1, 5965: 1}
     assert repr(tokens.to_array([attrs.ORTH])) == repr(numpy.array([[3699],
-                                                        [3699],
-                                                        [3750],
-                                                        [5965]], dtype=numpy.int32))
+                                                                    [3699],
+                                                                    [3750],
+                                                                    [5965]], dtype=numpy.int32))
 
 
 @pytest.mark.models

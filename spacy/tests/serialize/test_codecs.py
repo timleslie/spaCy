@@ -22,7 +22,7 @@ def test_binary():
 
 def test_attribute():
     freqs = {'the': 10, 'quick': 3, 'brown': 4, 'fox': 1, 'jumped': 5, 'over': 8,
-            'lazy': 1, 'dog': 2, '.': 9}
+             'lazy': 1, 'dog': 2, '.': 9}
 
     int_map = {'the': 0, 'quick': 1, 'brown': 2, 'fox': 3, 'jumped': 4, 'over': 5,
                'lazy': 6, 'dog': 7, '.': 8}

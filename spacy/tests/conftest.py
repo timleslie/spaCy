@@ -16,11 +16,11 @@ def DE():
 
 def pytest_addoption(parser):
     parser.addoption("--models", action="store_true",
-        help="include tests that require full models")
+                     help="include tests that require full models")
     parser.addoption("--vectors", action="store_true",
-        help="include word vectors tests")
+                     help="include word vectors tests")
     parser.addoption("--slow", action="store_true",
-        help="include slow tests")
+                     help="include slow tests")
 
 
 

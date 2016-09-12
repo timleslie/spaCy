@@ -41,7 +41,7 @@ def get_package_by_name(name=None, via=None):
     lang = get_lang_class(name)
     try:
         return sputnik.package(about.__title__, about.__version__,
-            name, data_path=via)
+                               name, data_path=via)
     except PackageNotFoundException as e:
         raise RuntimeError("Model '%s' not installed. Please run 'python -m "
                            "%s.download' to install latest compatible "

@@ -52,7 +52,7 @@ def test1():
 
 def test_round_trip():
     freqs = {'the': 10, 'quick': 3, 'brown': 4, 'fox': 1, 'jumped': 5, 'over': 8,
-            'lazy': 1, 'dog': 2, '.': 9}
+             'lazy': 1, 'dog': 2, '.': 9}
     codec = HuffmanCodec(freqs.items())
 
     message = ['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the',
