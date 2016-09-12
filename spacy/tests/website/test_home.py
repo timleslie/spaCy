@@ -144,11 +144,9 @@ def test_calculate_inline_mark_up_on_original_string():
             if token.is_space:
                 output.append(token.orth_)
             else:
-                output.append(
-                  template.format(
-                    classes=' '.join(get_classes(token)),
-                    word=token.orth_,
-                    space=token.whitespace_))
+                output.append(template.format(classes=' '.join(get_classes(token)),
+                                              word=token.orth_,
+                                              space=token.whitespace_))
         string = ''.join(output)
         string = string.replace('\n', '')
         string = string.replace('\t', '    ')
