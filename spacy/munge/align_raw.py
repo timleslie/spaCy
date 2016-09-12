@@ -137,7 +137,8 @@ def align_chars(raw, ptb):
             j += 1
         assert raw[i].lower() == ptb[j].lower(), raw[i:1]
         alignment[j] = i
-        i += 1; j += 1
+        i += 1
+        j += 1
     return alignment
 
 
