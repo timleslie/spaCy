@@ -5,22 +5,22 @@ from spacy.tokens import Doc
 
 def equal(doc1, doc2):
     # tokens
-    assert [ t.orth for t in doc1 ] == [ t.orth for t in doc2 ]
+    assert [t.orth for t in doc1] == [t.orth for t in doc2]
 
     # tags
-    assert [ t.pos for t in doc1 ] == [ t.pos for t in doc2 ]
-    assert [ t.tag for t in doc1 ] == [ t.tag for t in doc2 ]
+    assert [t.pos for t in doc1] == [t.pos for t in doc2]
+    assert [t.tag for t in doc1] == [t.tag for t in doc2]
 
     # parse
-    assert [ t.head.i for t in doc1 ] == [ t.head.i for t in doc2 ]
-    assert [ t.dep for t in doc1 ] == [ t.dep for t in doc2 ]
+    assert [t.head.i for t in doc1] == [t.head.i for t in doc2]
+    assert [t.dep for t in doc1] == [t.dep for t in doc2]
     if doc1.is_parsed and doc2.is_parsed:
-        assert [ s for s in doc1.sents ] == [ s for s in doc2.sents ]
+        assert [s for s in doc1.sents] == [s for s in doc2.sents]
 
     # entities
-    assert [ t.ent_type for t in doc1 ] == [ t.ent_type for t in doc2 ]
-    assert [ t.ent_iob for t in doc1 ] == [ t.ent_iob for t in doc2 ]
-    assert [ ent for ent in doc1.ents ] == [ ent for ent in doc2.ents ]
+    assert [t.ent_type for t in doc1] == [t.ent_type for t in doc2]
+    assert [t.ent_iob for t in doc1] == [t.ent_iob for t in doc2]
+    assert [ent for ent in doc1.ents] == [ent for ent in doc2.ents]
 
 
 @pytest.mark.models

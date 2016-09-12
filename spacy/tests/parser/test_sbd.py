@@ -75,7 +75,7 @@ def test_sentence_breaks(EN):
     assert len(list(doc.sents)) == 2
     for tok in doc:
         assert tok.dep != 0 or tok.is_space
-    assert [ tok.head.i for tok in doc ] == [1,1,3,1,1,6,6,8,6,6]
+    assert [tok.head.i for tok in doc] == [1,1,3,1,1,6,6,8,6,6]
 
 
 def apply_transition_sequence(model, doc, sequence):

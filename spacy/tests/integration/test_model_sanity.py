@@ -24,20 +24,20 @@ class TestModelSanity:
     def test_tagging(self, example):
         # if tagging was done properly, pos tags shouldn't be empty
         assert example.is_tagged
-        assert all( t.pos != 0 for t in example )
-        assert all( t.tag != 0 for t in example )
+        assert all(t.pos != 0 for t in example)
+        assert all(t.tag != 0 for t in example)
 
     def test_parsing(self, example):
         # if parsing was done properly
         # - dependency labels shouldn't be empty
         # - the head of some tokens should not be root
         assert example.is_parsed
-        assert all( t.dep != 0 for t in example )
-        assert any( t.dep != i for i,t in enumerate(example) )
+        assert all(t.dep != 0 for t in example)
+        assert any(t.dep != i for i,t in enumerate(example))
 
     def test_ner(self, example):
         # if ner was done properly, ent_iob shouldn't be empty
-        assert all( t.ent_iob != 0 for t in example )
+        assert all(t.ent_iob != 0 for t in example)
 
     def test_vectors(self, example):
         # if vectors are available, they should differ on different words

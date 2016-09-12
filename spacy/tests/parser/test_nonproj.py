@@ -11,10 +11,10 @@ def test_ancestors():
     cyclic_tree = [1,2,2,4,5,3,2]
     partial_tree = [1,2,2,4,5,None,2]
     multirooted_tree = [3,2,0,3,3,7,7,3,7,10,7,10,11,12,18,16,18,17,12,3]
-    assert([ a for a in ancestors(3,tree) ] == [4,5,2])
-    assert([ a for a in ancestors(3,cyclic_tree) ] == [4,5,3,4,5,3,4])
-    assert([ a for a in ancestors(3,partial_tree) ] == [4,5,None])
-    assert([ a for a in ancestors(17,multirooted_tree) ] == [])
+    assert([a for a in ancestors(3,tree)] == [4,5,2])
+    assert([a for a in ancestors(3,cyclic_tree)] == [4,5,3,4,5,3,4])
+    assert([a for a in ancestors(3,partial_tree)] == [4,5,None])
+    assert([a for a in ancestors(17,multirooted_tree)] == [])
 
 def test_contains_cycle():
     tree = [1,2,2,4,5,2,2]
@@ -57,15 +57,15 @@ def test_is_nonproj_tree():
 def deprojectivize(proj_heads, deco_labels, EN):
     slen = len(proj_heads)
     sent = EN.tokenizer.tokens_from_list(['whatever'] * slen)
-    rel_proj_heads = [ head-i for i,head in enumerate(proj_heads) ]
-    labelids = [ EN.vocab.strings[label] for label in deco_labels ]
+    rel_proj_heads = [head-i for i,head in enumerate(proj_heads)]
+    labelids = [EN.vocab.strings[label] for label in deco_labels]
     pairs = list(zip(rel_proj_heads,labelids))
     parse = numpy.asarray(pairs, dtype=numpy.int32)
     sent.from_array([HEAD,DEP],parse)
     PseudoProjectivity.deprojectivize(sent)
     parse = sent.to_array([HEAD,DEP])
-    deproj_heads = [ i+head for i,head in enumerate(parse[:,0]) ]
-    undeco_labels = [ EN.vocab.strings[int(labelid)] for labelid in parse[:,1] ]
+    deproj_heads = [i+head for i,head in enumerate(parse[:,0])]
+    undeco_labels = [EN.vocab.strings[int(labelid)] for labelid in parse[:,1]]
     return deproj_heads, undeco_labels
 
 
