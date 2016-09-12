@@ -33,18 +33,18 @@ def test_is_nonproj_arc():
     nonproj_tree = [1, 2, 2, 4, 5, 2, 7, 4, 2]
     partial_tree = [1, 2, 2, 4, 5, None, 7, 4, 2]
     multirooted_tree = [3, 2, 0, 3, 3, 7, 7, 3, 7, 10, 7, 10, 11, 12, 18, 16, 18, 17, 12, 3]
-    assert(is_nonproj_arc(0, nonproj_tree) == False)
-    assert(is_nonproj_arc(1, nonproj_tree) == False)
-    assert(is_nonproj_arc(2, nonproj_tree) == False)
-    assert(is_nonproj_arc(3, nonproj_tree) == False)
-    assert(is_nonproj_arc(4, nonproj_tree) == False)
-    assert(is_nonproj_arc(5, nonproj_tree) == False)
-    assert(is_nonproj_arc(6, nonproj_tree) == False)
-    assert(is_nonproj_arc(7, nonproj_tree) == True)
-    assert(is_nonproj_arc(8, nonproj_tree) == False)
-    assert(is_nonproj_arc(7, partial_tree) == False)
-    assert(is_nonproj_arc(17, multirooted_tree) == False)
-    assert(is_nonproj_arc(16, multirooted_tree) == True)
+    assert(is_nonproj_arc(0, nonproj_tree) is False)
+    assert(is_nonproj_arc(1, nonproj_tree) is False)
+    assert(is_nonproj_arc(2, nonproj_tree) is False)
+    assert(is_nonproj_arc(3, nonproj_tree) is False)
+    assert(is_nonproj_arc(4, nonproj_tree) is False)
+    assert(is_nonproj_arc(5, nonproj_tree) is False)
+    assert(is_nonproj_arc(6, nonproj_tree) is False)
+    assert(is_nonproj_arc(7, nonproj_tree) is True)
+    assert(is_nonproj_arc(8, nonproj_tree) is False)
+    assert(is_nonproj_arc(7, partial_tree) is False)
+    assert(is_nonproj_arc(17, multirooted_tree) is False)
+    assert(is_nonproj_arc(16, multirooted_tree) is True)
 
 
 def test_is_nonproj_tree():
@@ -52,10 +52,10 @@ def test_is_nonproj_tree():
     nonproj_tree = [1, 2, 2, 4, 5, 2, 7, 4, 2]
     partial_tree = [1, 2, 2, 4, 5, None, 7, 4, 2]
     multirooted_tree = [3, 2, 0, 3, 3, 7, 7, 3, 7, 10, 7, 10, 11, 12, 18, 16, 18, 17, 12, 3]
-    assert(is_nonproj_tree(proj_tree) == False)
-    assert(is_nonproj_tree(nonproj_tree) == True)
-    assert(is_nonproj_tree(partial_tree) == False)
-    assert(is_nonproj_tree(multirooted_tree) == True)
+    assert(is_nonproj_tree(proj_tree) is False)
+    assert(is_nonproj_tree(nonproj_tree) is True)
+    assert(is_nonproj_tree(partial_tree) is False)
+    assert(is_nonproj_tree(multirooted_tree) is True)
 
 
 def deprojectivize(proj_heads, deco_labels, EN):
@@ -84,8 +84,8 @@ def test_pseudoprojectivity(EN):
     assert(PseudoProjectivity.decompose('X||Y') == ('X', 'Y'))
     assert(PseudoProjectivity.decompose('X') == ('X', ''))
 
-    assert(PseudoProjectivity.is_decorated('X||Y') == True)
-    assert(PseudoProjectivity.is_decorated('X') == False)
+    assert(PseudoProjectivity.is_decorated('X||Y') is True)
+    assert(PseudoProjectivity.is_decorated('X') is False)
 
     PseudoProjectivity._lift(0, tree)
     assert(tree == [2, 2, 2])
