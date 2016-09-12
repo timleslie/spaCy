@@ -14,7 +14,7 @@ class TestNounChunks:
     def ex1_en(self, EN):
         example = EN.tokenizer.tokens_from_list('A base phrase should be recognized .'.split(' '))
         EN.tagger.tag_from_strings(example, 'DT NN NN MD VB VBN .'.split(' '))
-        det, compound, nsubjpass, aux, auxpass, root, punct = tuple(EN.vocab.strings[l] for l in ['det', 'compound', 'nsubjpass', 'aux', 'auxpass', 'root', 'punct'] )
+        det, compound, nsubjpass, aux, auxpass, root, punct = tuple(EN.vocab.strings[l] for l in ['det', 'compound', 'nsubjpass', 'aux', 'auxpass', 'root', 'punct'])
         example.from_array([HEAD, DEP], numpy.asarray([[2, det],
                                                        [1, compound],
                                                        [3, nsubjpass],
@@ -29,7 +29,7 @@ class TestNounChunks:
     def ex2_en(self, EN):
         example = EN.tokenizer.tokens_from_list('A base phrase and a good phrase are often the same .'.split(' '))
         EN.tagger.tag_from_strings(example, 'DT NN NN CC DT JJ NN VBP RB DT JJ .'.split(' '))
-        det, compound, nsubj, cc, amod, conj, root, advmod, attr, punct = tuple(EN.vocab.strings[l] for l in ['det', 'compound', 'nsubj', 'cc', 'amod', 'conj', 'root', 'advmod', 'attr', 'punct'] )
+        det, compound, nsubj, cc, amod, conj, root, advmod, attr, punct = tuple(EN.vocab.strings[l] for l in ['det', 'compound', 'nsubj', 'cc', 'amod', 'conj', 'root', 'advmod', 'attr', 'punct'])
         example.from_array([HEAD, DEP], numpy.asarray([[2, det],
                                                        [1, compound],
                                                        [5, nsubj],
@@ -49,7 +49,7 @@ class TestNounChunks:
     def ex3_en(self, EN):
         example = EN.tokenizer.tokens_from_list('A phrase with another phrase occurs .'.split(' '))
         EN.tagger.tag_from_strings(example, 'DT NN IN DT NN VBZ .'.split(' '))
-        det, nsubj, prep, pobj, root, punct = tuple(EN.vocab.strings[l] for l in ['det', 'nsubj', 'prep', 'pobj', 'root', 'punct'] )
+        det, nsubj, prep, pobj, root, punct = tuple(EN.vocab.strings[l] for l in ['det', 'nsubj', 'prep', 'pobj', 'root', 'punct'])
         example.from_array([HEAD, DEP], numpy.asarray([[1, det],
                                                        [4, nsubj],
                                                        [-1, prep],
