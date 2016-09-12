@@ -23,10 +23,10 @@ def test_contains_cycle():
     cyclic_tree = [1, 2, 2, 4, 5, 3, 2]
     partial_tree = [1, 2, 2, 4, 5, None, 2]
     multirooted_tree = [3, 2, 0, 3, 3, 7, 7, 3, 7, 10, 7, 10, 11, 12, 18, 16, 18, 17, 12, 3]
-    assert(contains_cycle(tree) == None)
+    assert(contains_cycle(tree) is None)
     assert(contains_cycle(cyclic_tree) == set([3, 4, 5]))
-    assert(contains_cycle(partial_tree) == None)
-    assert(contains_cycle(multirooted_tree) == None)
+    assert(contains_cycle(partial_tree) is None)
+    assert(contains_cycle(multirooted_tree) is None)
 
 
 def test_is_nonproj_arc():

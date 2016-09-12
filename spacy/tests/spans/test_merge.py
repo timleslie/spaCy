@@ -50,7 +50,7 @@ def test_np_merges(EN):
             for e in tokens.ents]
     for start, end, label, lemma in ents:
         merged = tokens.merge(start, end, label, lemma, label)
-        assert merged != None, (start, end, label, lemma)
+        assert merged is not None, (start, end, label, lemma)
 
 
 @pytest.mark.models
