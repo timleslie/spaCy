@@ -88,6 +88,7 @@ def test_part_of_speech_tags(nlp):
     # up the IDs from the StringStore.
     NNS = nlp.vocab.strings['NNS']
     NNPS = nlp.vocab.strings['NNPS']
+
     def is_plural_noun(token):
         return token.tag == NNS or token.tag == NNPS
 
