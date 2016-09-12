@@ -22,7 +22,7 @@ class Chinese(Language):
         chunks = []
         for token in doc:
             if token.tag_ != 'CHAR':
-                chunk = doc[start : token.i + 1]
+                chunk = doc[start:token.i + 1]
                 chunks.append(chunk)
                 start = token.i + 1
         text = doc.text
