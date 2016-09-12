@@ -16,7 +16,7 @@ def morph_exc():
 @pytest.mark.models
 def test_load_exc(morph_exc):
     # Do this local as we want to modify it
-    nlp =  English()
+    nlp = English()
     nlp.vocab.morphology.load_morph_exceptions(morph_exc)
     tokens = nlp('I like his style.', tag=True, parse=False)
     his = tokens[2]
