@@ -237,6 +237,5 @@ def main(odc_dir, onto_dir, out_dir):
         path.join(out_dir, 'web', 'align'))
 
 
-
 if __name__ == '__main__':
     plac.call(main)

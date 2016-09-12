@@ -7,7 +7,6 @@ from spacy.parts_of_speech import SPACE
 import pytest
 
 
-
 @pytest.fixture
 def tagged(EN):
     string = u'Some\nspaces are\tnecessary.'

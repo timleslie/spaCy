@@ -33,7 +33,6 @@ def test_big_ellipsis(en_tokenizer):
     assert len(tokens) > 2
 
 
-
 def test_email(en_tokenizer):
     tokens = en_tokenizer('hello@example.com')
     assert len(tokens) == 1

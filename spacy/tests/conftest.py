@@ -23,7 +23,6 @@ def pytest_addoption(parser):
                      help="include slow tests")
 
 
-
 def pytest_runtest_setup(item):
     for opt in ['models', 'vectors', 'slow']:
         if opt in item.keywords and not item.config.getoption("--%s" % opt):

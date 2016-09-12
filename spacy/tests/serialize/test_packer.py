@@ -64,7 +64,6 @@ def test_packer_unannotated(tokenizer):
 
     assert msg.string == 'the dog jumped'
 
-
     bits = packer.pack(msg)
 
     result = packer.unpack(bits)
