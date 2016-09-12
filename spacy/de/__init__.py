@@ -10,8 +10,8 @@ class German(Language):
 
     @classmethod
     def default_vocab(cls, package, get_lex_attr=None, vectors_package=None):
-        vocab = super(German,cls).default_vocab(package,get_lex_attr,vectors_package)
+        vocab = super(German, cls).default_vocab(package, get_lex_attr, vectors_package)
         # set a dummy lemmatizer for now that simply returns the same string
         # until the morphology is done for German
-        vocab.morphology.lemmatizer = lambda string,pos: set([string])
+        vocab.morphology.lemmatizer = lambda string, pos: set([string])
         return vocab

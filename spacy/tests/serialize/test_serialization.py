@@ -26,7 +26,7 @@ def equal(doc1, doc2):
 
 @pytest.mark.models
 def test_serialize_tokens(EN):
-    doc1 = EN(u'This is a test sentence.',tag=False, parse=False, entity=False)
+    doc1 = EN(u'This is a test sentence.', tag=False, parse=False, entity=False)
 
     doc2 = Doc(EN.vocab).from_bytes(doc1.to_bytes())
     equal(doc1, doc2)
@@ -34,14 +34,14 @@ def test_serialize_tokens(EN):
 
 @pytest.mark.models
 def test_serialize_tokens_tags(EN):
-    doc1 = EN(u'This is a test sentence.',tag=True, parse=False, entity=False)
+    doc1 = EN(u'This is a test sentence.', tag=True, parse=False, entity=False)
     doc2 = Doc(EN.vocab).from_bytes(doc1.to_bytes())
     equal(doc1, doc2)
 
 
 @pytest.mark.models
 def test_serialize_tokens_parse(EN):
-    doc1 = EN(u'This is a test sentence.',tag=False, parse=True, entity=False)
+    doc1 = EN(u'This is a test sentence.', tag=False, parse=True, entity=False)
 
     doc2 = Doc(EN.vocab).from_bytes(doc1.to_bytes())
     equal(doc1, doc2)

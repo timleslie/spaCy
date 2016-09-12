@@ -63,7 +63,7 @@ def test_space_attachment_intermediate_and_trailing_space(EN):
     assert stepwise.stack == set([])
     for tok in doc:
         assert tok.dep != 0 or tok.is_space
-    assert [tok.head.i for tok in doc] == [1,1,1,6,3,3,1,1,7,7]
+    assert [tok.head.i for tok in doc] == [1, 1, 1, 6, 3, 3, 1, 1, 7, 7]
 
 
 @pytest.mark.models

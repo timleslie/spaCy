@@ -11,7 +11,7 @@ class TestModelSanity:
     Tests are not meant to evaluate the content of the output, only make sure the output is formally okay.
     """
 
-    @pytest.fixture(scope='class', params=['en','de'])
+    @pytest.fixture(scope='class', params=['en', 'de'])
     def example(self, request, EN, DE):
         if request.param == 'en':
             return EN(u'There was a stranger standing at the big street talking to herself.')
@@ -34,7 +34,7 @@ class TestModelSanity:
         # - the head of some tokens should not be root
         assert example.is_parsed
         assert all(t.dep != 0 for t in example)
-        assert any(t.dep != i for i,t in enumerate(example))
+        assert any(t.dep != i for i, t in enumerate(example))
 
     def test_ner(self, example):
         # if ner was done properly, ent_iob shouldn't be empty
@@ -47,9 +47,9 @@ class TestModelSanity:
         vector0 = example[0].vector
         vector1 = example[1].vector
         vector2 = example[2].vector
-        assert not numpy.array_equal(vector0,vector1)
-        assert not numpy.array_equal(vector0,vector2)
-        assert not numpy.array_equal(vector1,vector2)
+        assert not numpy.array_equal(vector0, vector1)
+        assert not numpy.array_equal(vector0, vector2)
+        assert not numpy.array_equal(vector1, vector2)
 
     def test_probs(self, example):
         # if frequencies/probabilities are okay, they should differ for different words

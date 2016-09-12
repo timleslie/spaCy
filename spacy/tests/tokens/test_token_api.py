@@ -75,7 +75,7 @@ def test_ancestors(EN):
     # the structure of this sentence depends on the English annotation scheme
     tokens = EN(u'Yesterday I saw a dog that barked loudly.')
     ancestors = [t.orth_ for t in tokens[6].ancestors]
-    assert ancestors == ['dog','saw']
+    assert ancestors == ['dog', 'saw']
     ancestors = [t.orth_ for t in tokens[1].ancestors]
     assert ancestors == ['saw']
     ancestors = [t.orth_ for t in tokens[2].ancestors]
