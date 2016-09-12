@@ -42,7 +42,7 @@ class TestNounChunks:
                                                        [1, det],
                                                        [-3, attr],
                                                        [-4, punct]
-                                                   ], dtype='int32'))
+                                                       ], dtype='int32'))
         return example
 
     @pytest.fixture(scope="class")
