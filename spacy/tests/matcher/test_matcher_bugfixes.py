@@ -23,7 +23,7 @@ def test_overlap_issue118(EN):
             )
         }
     )
-    
+
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
     assert matches == [(ORG, 9, 11), (ORG, 10, 11)]
@@ -46,7 +46,7 @@ def test_overlap_issue242():
         data_dir = os.environ.get('SPACY_DATA')
     else:
         data_dir = None
- 
+
     nlp = spacy.en.English(data_dir=data_dir, tagger=False, parser=False, entity=False)
 
     nlp.matcher.add('FOOD', 'FOOD', {}, patterns)
@@ -73,7 +73,7 @@ def test_overlap_reorder(EN):
             )
         }
     )
-    
+
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
     assert matches == [(ORG, 9, 11), (ORG, 10, 11)]
@@ -98,7 +98,7 @@ def test_overlap_prefix(EN):
             )
         }
     )
-    
+
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
     assert matches == [(ORG, 9, 10), (ORG, 9, 11)]
@@ -123,7 +123,7 @@ def test_overlap_prefix_reorder(EN):
             )
         }
     )
-    
+
     assert len(list(doc.ents)) == 0
     matches = matcher(doc)
     assert matches == [(ORG, 9, 10), (ORG, 9, 11)]
@@ -145,7 +145,7 @@ def test_overlap_prefix_reorder(EN):
 #     assert ents[1] == ('AIRPORT', 'LAX')
 #     assert ents[2] == ('DATE', '20 December')
 #     assert ents[3] == ('DATE', 'January 5th')
- 
+
 
 # @pytest.mark.models
 # def test_ner_interaction(EN):
@@ -155,7 +155,7 @@ def test_overlap_prefix_reorder(EN):
 
 #     columns = [ENT_IOB, ENT_TYPE]
 #     values = numpy.ndarray(shape=(len(doc),len(columns)), dtype='int32')
-#     # IOB values are 0=missing, 1=I, 2=O, 3=B 
+#     # IOB values are 0=missing, 1=I, 2=O, 3=B
 #     iobs = [2,2,2,2,2,3,2,3,2,3,1,2,2,2,3,1]
 #     types = [0,0,0,0,0,LOC,0,LOC,0,DATE,DATE,0,0,0,DATE,DATE]
 #     values[:] = zip(iobs,types)

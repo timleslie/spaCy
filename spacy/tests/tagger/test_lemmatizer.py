@@ -59,5 +59,5 @@ def test_pickle_lemmatizer(lemmatizer):
     pickle.dump(lemmatizer, file_)
 
     file_.seek(0)
-    
+
     loaded = pickle.load(file_)

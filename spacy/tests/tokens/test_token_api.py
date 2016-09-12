@@ -27,7 +27,7 @@ def test_strings(EN):
 def test_flags(EN):
     tokens = EN(u'Give it back! He pleaded.')
     token = tokens[0]
- 
+
     assert token.check_flag(IS_ALPHA)
     assert not token.check_flag(IS_DIGIT)
     # TODO: Test more of these, esp. if a bug is found
@@ -67,7 +67,7 @@ def test_vectors(EN):
     assert apples.similarity(oranges) == oranges.similarity(apples)
     assert sum(apples.vector) != sum(oranges.vector)
     assert apples.vector_norm != oranges.vector_norm
-    
+
 @pytest.mark.models
 def test_ancestors(EN):
     # the structure of this sentence depends on the English annotation scheme
@@ -96,7 +96,7 @@ def test_head_setter(EN):
     assert dog.n_rights == 1
     assert dog.left_edge == a
     assert dog.right_edge == loudly
-    
+
     assert a.n_lefts == 0
     assert a.n_rights == 0
     assert a.left_edge == a

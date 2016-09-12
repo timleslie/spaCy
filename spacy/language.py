@@ -216,7 +216,7 @@ class Language(object):
         """Apply the pipeline to some text.  The text can span multiple sentences,
         and can contain arbtrary whitespace.  Alignment into the original string
         is preserved.
-        
+
         Args:
             text (unicode): The text to be processed.
 

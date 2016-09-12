@@ -48,7 +48,7 @@ def test_symbols(en_vocab):
 def test_contains(en_vocab):
     assert 'Hello' in en_vocab
     assert 'LKsdjvlsakdvlaksdvlkasjdvljasdlkfvm' not in en_vocab
-    
+
 
 @pytest.mark.xfail
 def test_pickle_vocab(en_vocab):
@@ -68,7 +68,7 @@ def test_pickle_vocab_vectors(en_vocab):
     apples = en_vocab['apples']
     oranges = en_vocab['oranges']
     hippos = en_vocab['hippos']
-    
+
     assert apples.similarity(oranges) > apples.similarity(hippos)
 
     apples.vector = hippos.vector
@@ -87,4 +87,4 @@ def test_pickle_vocab_vectors(en_vocab):
     hippos = loaded['hippos']
 
     assert apples.similarity(oranges) < apples.similarity(hippos)
-   
+

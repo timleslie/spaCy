@@ -45,12 +45,12 @@ def test_np_merges(EN):
     tokens.merge(tokens[2].idx, tokens[4].idx + len(tokens[4]), u'NP', u'tool', u'O')
     assert tokens[2].head.i == 1
     tokens = EN('displaCy is a lightweight and modern dependency parse tree visualization tool built with CSS3 and JavaScript.')
-    
+
     ents = [(e[0].idx, e[-1].idx + len(e[-1]), e.label_, e.lemma_)
             for e in tokens.ents]
     for start, end, label, lemma in ents:
         merged = tokens.merge(start, end, label, lemma, label)
-        assert merged != None, (start, end, label, lemma) 
+        assert merged != None, (start, end, label, lemma)
 
 @pytest.mark.models
 def test_entity_merge(EN):

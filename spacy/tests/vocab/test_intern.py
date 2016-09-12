@@ -88,7 +88,7 @@ def test_pickle_string_store(sstore):
     pickle.dump(sstore, string_file)
 
     string_file.seek(0)
-    
+
     loaded = pickle.load(string_file)
 
     assert loaded[hello_id] == u'Hi'
@@ -96,7 +96,7 @@ def test_pickle_string_store(sstore):
 
 def test_dump_load(sstore):
     id_ = sstore[u'qqqqq']
-    with tempfile.TemporaryFile('w+t') as file_: 
+    with tempfile.TemporaryFile('w+t') as file_:
         sstore.dump(file_)
         file_.seek(0)
         new_store = StringStore()

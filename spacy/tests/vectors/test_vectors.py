@@ -30,7 +30,7 @@ def test_token_token_similarity(EN):
     apples, oranges = EN(u'apples oranges')
     assert apples.similarity(oranges) == oranges.similarity(apples)
     assert 0.0 < apples.similarity(oranges) < 1.0
-    
+
 
 @pytest.mark.models
 def test_token_lexeme_similarity(EN):
@@ -38,7 +38,7 @@ def test_token_lexeme_similarity(EN):
     oranges = EN.vocab[u'oranges']
     assert apples.similarity(oranges) == oranges.similarity(apples)
     assert 0.0 < apples.similarity(oranges) < 1.0
- 
+
 
 @pytest.mark.models
 def test_token_span_similarity(EN):
@@ -47,7 +47,7 @@ def test_token_span_similarity(EN):
     oranges = doc[1:3]
     assert apples.similarity(oranges) == oranges.similarity(apples)
     assert 0.0 < apples.similarity(oranges) < 1.0
- 
+
 
 @pytest.mark.models
 def test_token_doc_similarity(EN):
@@ -55,7 +55,7 @@ def test_token_doc_similarity(EN):
     apples = doc[0]
     assert apples.similarity(doc) == doc.similarity(apples)
     assert 0.0 < apples.similarity(doc) < 1.0
- 
+
 
 @pytest.mark.models
 def test_lexeme_span_similarity(EN):
@@ -72,7 +72,7 @@ def test_lexeme_lexeme_similarity(EN):
     oranges = EN.vocab[u'oranges']
     assert apples.similarity(oranges) == oranges.similarity(apples)
     assert 0.0 < apples.similarity(oranges) < 1.0
- 
+
 
 @pytest.mark.models
 def test_lexeme_doc_similarity(EN):
@@ -80,7 +80,7 @@ def test_lexeme_doc_similarity(EN):
     apples = EN.vocab[u'apples']
     assert apples.similarity(doc) == doc.similarity(apples)
     assert 0.0 < apples.similarity(doc) < 1.0
- 
+
 
 @pytest.mark.models
 def test_span_span_similarity(EN):
@@ -89,7 +89,7 @@ def test_span_span_similarity(EN):
     oj = doc[1:3]
     assert apples.similarity(oj) == oj.similarity(apples)
     assert 0.0 < apples.similarity(oj) < 1.0
- 
+
 
 @pytest.mark.models
 def test_span_doc_similarity(EN):
@@ -98,7 +98,7 @@ def test_span_doc_similarity(EN):
     oj = doc[1:3]
     assert apples.similarity(doc) == doc.similarity(apples)
     assert 0.0 < apples.similarity(doc) < 1.0
- 
+
 
 @pytest.mark.models
 def test_doc_doc_similarity(EN):
@@ -106,4 +106,4 @@ def test_doc_doc_similarity(EN):
     oranges = EN(u'orange juice')
     assert apples.similarity(oranges) == apples.similarity(oranges)
     assert 0.0 < apples.similarity(oranges) < 1.0
- 
+

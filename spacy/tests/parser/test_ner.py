@@ -49,4 +49,4 @@ def test_unit_end_gazetteer(EN):
         assert list(doc.ents)[0].text == 'cal'
 
 
- 
+

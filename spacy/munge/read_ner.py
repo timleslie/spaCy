@@ -8,7 +8,7 @@ def split(text):
     """Split an annotation file by sentence. Each sentence's annotation should
     be a single string."""
     return text.strip().split('\n')[1:-1]
-    
+
 
 def parse(string, strip_bad_periods=False):
     """Given a sentence's annotation string, return a list of word strings,

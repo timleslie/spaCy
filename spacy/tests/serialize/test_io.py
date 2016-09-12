@@ -55,4 +55,4 @@ def test_lemmas(EN):
     assert are.lemma_ == 'be'
     assert flying.lemma_ == 'fly'
 
- 
+

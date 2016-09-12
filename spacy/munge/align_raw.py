@@ -26,7 +26,7 @@ def read_odc(section_loc):
         ("The hotel and gaming company", "The hotel and Gaming company"),
         ("I'm-coming-down-your-throat", "I-'m coming-down-your-throat"),
     )
-    
+
     paragraphs = []
     with open(section_loc) as file_:
         para = []
@@ -73,7 +73,7 @@ def _reform_ptb_word(tok):
     tok = tok.replace('-LRB-', '(')
     tok = tok.replace("'T-", "'T")
     return tok
- 
+
 
 def get_alignment(raw_by_para, ptb_by_file):
     # These are list-of-lists, by paragraph and file respectively.
@@ -204,7 +204,7 @@ def do_web(src_dir, onto_dir, out_dir):
         if not annot_fn.startswith('eng'):
             continue
 
-        ptb_loc = path.join(onto_dir, annot_fn + '.parse') 
+        ptb_loc = path.join(onto_dir, annot_fn + '.parse')
         src_loc = path.join(src_dir, src_fn + '.sgm')
 
         if path.exists(ptb_loc) and path.exists(src_loc):

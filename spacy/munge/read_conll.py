@@ -16,7 +16,7 @@ def parse(sent_text, strip_bad_periods=False):
         if strip_bad_periods and words and _is_bad_period(words[-1], word):
             continue
         id_map[i] = len(words)
-  
+
         annot.append({
             'id': len(words),
             'word': word,

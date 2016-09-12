@@ -41,14 +41,14 @@ def test1():
     probs[7] = 0.005
     probs[8] = 0.0001
     probs[9] = 0.000001
-    
+
     codec = HuffmanCodec(list(enumerate(probs)))
-    
+
     py_codes = py_encode(dict(enumerate(probs)))
     py_codes = list(py_codes.items())
     py_codes.sort()
     assert codec.strings == [c for i, c in py_codes]
-    
+
 
 def test_round_trip():
     freqs = {'the': 10, 'quick': 3, 'brown': 4, 'fox': 1, 'jumped': 5, 'over': 8,

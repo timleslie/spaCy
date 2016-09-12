@@ -146,7 +146,7 @@ def test_merge_children(EN):
     doc = EN('WKRO played songs by the beach boys all night')
     # merge 'The Beach Boys'
     doc.merge(doc[4].idx, doc[6].idx + len(doc[6]), 'NAMED', 'LEMMA', 'TYPE')
-    
+
     for word in doc:
         if word.i < word.head.i:
             assert word in list(word.head.lefts)
