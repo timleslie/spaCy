@@ -17,7 +17,7 @@ def test_getitem(EN):
         tokens[len(tokens)]
 
     def to_str(span):
-       return '/'.join(token.orth_ for token in span)
+        return '/'.join(token.orth_ for token in span)
 
     span = tokens[1:1]
     assert not to_str(span)

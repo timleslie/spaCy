@@ -58,15 +58,15 @@ def normalize_slice(length, start, stop, step=None):
         raise ValueError("Stepped slices not supported in Span objects."
                          "Try: list(tokens)[start:stop:step] instead.")
     if start is None:
-       start = 0
+        start = 0
     elif start < 0:
-       start += length
+        start += length
     start = min(length, max(0, start))
 
     if stop is None:
-       stop = length
+        stop = length
     elif stop < 0:
-       stop += length
+        stop += length
     stop = min(length, max(start, stop))
 
     assert 0 <= start <= stop <= length

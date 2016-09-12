@@ -164,8 +164,8 @@ def test_efficient_binary_serialization(doc):
 
     nlp = spacy.en.English()
     for byte_string in Doc.read_bytes(open('moby_dick.bin', 'rb')):
-       doc = Doc(nlp.vocab)
-       doc.from_bytes(byte_string)
+        doc = Doc(nlp.vocab)
+        doc.from_bytes(byte_string)
 
 
 @pytest.mark.models
