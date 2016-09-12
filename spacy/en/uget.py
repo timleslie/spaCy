@@ -12,19 +12,24 @@ except ImportError:
     from urllib2 import urlopen, urlparse, Request, HTTPError
 
 
-class UnknownContentLengthException(Exception): pass
+class UnknownContentLengthException(Exception):
+    pass
 
 
-class InvalidChecksumException(Exception): pass
+class InvalidChecksumException(Exception):
+    pass
 
 
-class UnsupportedHTTPCodeException(Exception): pass
+class UnsupportedHTTPCodeException(Exception):
+    pass
 
 
-class InvalidOffsetException(Exception): pass
+class InvalidOffsetException(Exception):
+    pass
 
 
-class MissingChecksumHeader(Exception): pass
+class MissingChecksumHeader(Exception):
+    pass
 
 
 CHUNK_SIZE = 16 * 1024
