@@ -29,4 +29,3 @@ def test_lexeme_lt(en_vocab):
 
     assert noun < opera
     assert opera > noun
-

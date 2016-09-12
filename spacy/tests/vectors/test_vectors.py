@@ -106,4 +106,3 @@ def test_doc_doc_similarity(EN):
     oranges = EN(u'orange juice')
     assert apples.similarity(oranges) == apples.similarity(oranges)
     assert 0.0 < apples.similarity(oranges) < 1.0
-

@@ -120,18 +120,3 @@ def test_pseudoprojectivity(EN):
     deproj_heads, undeco_labels = deprojectivize(proj_heads,deco_labels,EN)
     assert(deproj_heads == [3,1,3,1,5,6,9,8,6,1,6,12,13,10,1])
     assert(undeco_labels == ['advmod','root','det','aux','advmod','det','dobj','det','nmod','aux','nmod','advmod','det','amod','punct'])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

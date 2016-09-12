@@ -180,13 +180,3 @@ def test_overlap_prefix_reorder(EN):
 #     assert doc[10].ent_type_ == 'DATE'
 #     assert doc[14].ent_type_ == 'DATE'
 #     assert doc[15].ent_type_ == 'DATE'
-
-
-
-
-
-
-
-
-
-

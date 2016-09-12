@@ -46,4 +46,3 @@ def _parse_line(line):
         return pieces
     else:
         return pieces[1], pieces[3], pieces[5], pieces[6]
-

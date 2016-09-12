@@ -55,5 +55,3 @@ def test_hongbin():
     words, annot = spacy.munge.read_conll.parse(hongbin_example, strip_bad_periods=True)
     assert words[annot[0]['head']] == 'have'
     assert words[annot[1]['head']] == 'Hongbin'
-
-

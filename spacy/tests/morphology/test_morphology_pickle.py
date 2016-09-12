@@ -10,8 +10,7 @@ from spacy.strings import StringStore
 
 @pytest.mark.xfail
 def test_pickle():
-    morphology = Morphology(StringStore(), {}, Lemmatizer({}, {}, {})) 
+    morphology = Morphology(StringStore(), {}, Lemmatizer({}, {}, {}))
 
     file_ = io.BytesIO()
     pickle.dump(morphology, file_)
-

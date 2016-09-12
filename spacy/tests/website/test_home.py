@@ -177,4 +177,3 @@ def test_multithreading(nlp):
         assert doc.is_parsed
         if i == 100:
             break
-

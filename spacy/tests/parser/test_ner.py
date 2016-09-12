@@ -47,6 +47,3 @@ def test_unit_end_gazetteer(EN):
         assert len(ents) == 1
         EN.entity(doc)
         assert list(doc.ents)[0].text == 'cal'
-
-
-

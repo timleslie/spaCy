@@ -39,4 +39,3 @@ def test_align():
     gold = [u'i', u'like', u'2', u'guys', u'well', u'i', u'd', u'just', u'come',
             u'straight', u'out']
     assert align(cand, gold) == [0, 1, 2, 3, None, 4, None, 7, 8, 9, 10]
-

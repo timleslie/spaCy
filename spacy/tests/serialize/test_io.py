@@ -54,5 +54,3 @@ def test_lemmas(EN):
     assert geese.lemma_ == 'goose'
     assert are.lemma_ == 'be'
     assert flying.lemma_ == 'fly'
-
-

@@ -14,4 +14,3 @@ def test_pickle(EN):
     file_.seek(0)
 
     loaded = pickle.load(file_)
-

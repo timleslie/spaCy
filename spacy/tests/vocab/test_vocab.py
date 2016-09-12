@@ -87,4 +87,3 @@ def test_pickle_vocab_vectors(en_vocab):
     hippos = loaded['hippos']
 
     assert apples.similarity(oranges) < apples.similarity(hippos)
-

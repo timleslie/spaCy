@@ -30,4 +30,3 @@ def test_not_nested():
             word_occurred[word.text] += 1
     for word, freq in word_occurred.items():
         assert freq == 1, (word, [chunk.text for chunk in tokens.noun_chunks])
-

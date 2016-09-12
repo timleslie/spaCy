@@ -199,4 +199,3 @@ def test_right_edge(EN):
 def test_has_vector(EN):
     doc = EN(u'''apple orange pear''')
     assert doc.has_vector
-
