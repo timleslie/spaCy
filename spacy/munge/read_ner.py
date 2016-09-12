@@ -42,6 +42,8 @@ def parse(string, strip_bad_periods=False):
 
 
 tag_re = re.compile(r'<ENAMEXTYPE="[^"]+">')
+
+
 def _fix_inner_entities(substr):
     tags = tag_re.findall(substr)
     if '</ENAMEX' in substr and not substr.endswith('</ENAMEX'):

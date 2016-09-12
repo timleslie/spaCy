@@ -74,6 +74,7 @@ def test_count_by(nlp):
                                                         [3750],
                                                         [5965]], dtype=numpy.int32))
 
+
 @pytest.mark.models
 def test_read_bytes(nlp):
     from spacy.tokens.doc import Doc

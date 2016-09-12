@@ -3,6 +3,7 @@
 import pytest
 import numpy
 
+
 @pytest.mark.models
 class TestModelSanity:
     """

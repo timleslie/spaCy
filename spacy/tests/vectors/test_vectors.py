@@ -1,10 +1,12 @@
 import pytest
 
+
 @pytest.mark.models
 def test_token_vector(EN):
     token = EN(u'Apples and oranges')[0]
     token.vector
     token.vector_norm
+
 
 @pytest.mark.models
 def test_lexeme_vector(EN):
@@ -19,11 +21,13 @@ def test_doc_vector(EN):
     doc.vector
     doc.vector_norm
 
+
 @pytest.mark.models
 def test_span_vector(EN):
     span = EN(u'Apples and oranges')[0:2]
     span.vector
     span.vector_norm
+
 
 @pytest.mark.models
 def test_token_token_similarity(EN):

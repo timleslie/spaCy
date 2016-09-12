@@ -1,5 +1,6 @@
 from spacy.util import detokenize
 
+
 def test_punct():
     tokens = 'Pierre Vinken , 61 years old .'.split()
     detoks = [(0,), (1, 2), (3,), (4,), (5, 6)]

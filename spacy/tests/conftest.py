@@ -3,9 +3,11 @@ import os
 
 import spacy
 
+
 @pytest.fixture(scope="session")
 def EN():
     return spacy.load("en")
+
 
 @pytest.fixture(scope="session")
 def DE():

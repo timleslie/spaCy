@@ -4,6 +4,7 @@ import pytest
 import numpy
 from spacy.attrs import HEAD
 
+
 def make_doc(EN, sentstr):
     sent = sentstr.split(' ')
     doc = EN.tokenizer.tokens_from_list(sent)

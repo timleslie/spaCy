@@ -6,6 +6,7 @@ import numpy
 
 from spacy.syntax.nonproj import ancestors, contains_cycle, is_nonproj_arc, is_nonproj_tree, PseudoProjectivity
 
+
 def test_ancestors():
     tree = [1,2,2,4,5,2,2]
     cyclic_tree = [1,2,2,4,5,3,2]
@@ -16,6 +17,7 @@ def test_ancestors():
     assert([a for a in ancestors(3,partial_tree)] == [4,5,None])
     assert([a for a in ancestors(17,multirooted_tree)] == [])
 
+
 def test_contains_cycle():
     tree = [1,2,2,4,5,2,2]
     cyclic_tree = [1,2,2,4,5,3,2]
@@ -25,6 +27,7 @@ def test_contains_cycle():
     assert(contains_cycle(cyclic_tree) == set([3,4,5]))
     assert(contains_cycle(partial_tree) == None)
     assert(contains_cycle(multirooted_tree) == None)
+
 
 def test_is_nonproj_arc():
     nonproj_tree = [1,2,2,4,5,2,7,4,2]
@@ -42,6 +45,7 @@ def test_is_nonproj_arc():
     assert(is_nonproj_arc(7,partial_tree) == False)
     assert(is_nonproj_arc(17,multirooted_tree) == False)
     assert(is_nonproj_arc(16,multirooted_tree) == True)
+
 
 def test_is_nonproj_tree():
     proj_tree = [1,2,2,4,5,2,7,5,2]

@@ -32,6 +32,7 @@ def test_aint(en_tokenizer):
     assert tokens[1].orth_ == "n't"
     assert tokens[1].lemma_ == "not"
 
+
 def test_capitalized(en_tokenizer):
     tokens = en_tokenizer("can't")
     assert len(tokens) == 2

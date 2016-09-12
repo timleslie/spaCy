@@ -59,10 +59,12 @@ def test_254_string(sstore):
     orth = sstore[s254]
     assert sstore[orth] == s254
 
+
 def test_255_string(sstore):
     s255 = 'b' * 255
     orth = sstore[s255]
     assert sstore[orth] == s255
+
 
 def test_256_string(sstore):
     s256 = 'c' * 256

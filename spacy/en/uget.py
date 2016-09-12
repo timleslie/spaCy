@@ -13,9 +13,17 @@ except ImportError:
 
 
 class UnknownContentLengthException(Exception): pass
+
+
 class InvalidChecksumException(Exception): pass
+
+
 class UnsupportedHTTPCodeException(Exception): pass
+
+
 class InvalidOffsetException(Exception): pass
+
+
 class MissingChecksumHeader(Exception): pass
 
 

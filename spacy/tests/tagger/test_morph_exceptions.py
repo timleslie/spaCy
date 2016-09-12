@@ -5,6 +5,7 @@ import pytest
 
 from spacy.en import English
 
+
 @pytest.fixture
 def morph_exc():
     return {

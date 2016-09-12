@@ -3,6 +3,7 @@ import pytest
 
 from spacy.tokens import Doc
 
+
 def equal(doc1, doc2):
     # tokens
     assert [t.orth for t in doc1] == [t.orth for t in doc2]

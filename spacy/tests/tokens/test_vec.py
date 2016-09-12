@@ -4,6 +4,7 @@ from spacy.en import English
 
 import pytest
 
+
 @pytest.mark.models
 def test_vec(EN):
     hype = EN.vocab['hype']

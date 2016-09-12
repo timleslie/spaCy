@@ -131,6 +131,7 @@ def test_cnts6(en_tokenizer):
     words = [t.orth_ for t in tokens]
     assert len(words) == 6
 
+
 def test_bracket_period(en_tokenizer):
     text = u'(And a 6a.m. run through Washington Park).'
     tokens = en_tokenizer(text)

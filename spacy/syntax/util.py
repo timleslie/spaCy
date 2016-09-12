@@ -1,6 +1,7 @@
 from os import path
 import json
 
+
 class Config(object):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():

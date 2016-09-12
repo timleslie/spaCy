@@ -54,5 +54,6 @@ def test_is_bracket(words):
 def test_is_left_bracket(words):
     pass
 
+
 def test_is_right_bracket(words):
     pass

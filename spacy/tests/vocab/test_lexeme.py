@@ -13,6 +13,7 @@ def test_lexeme_eq(en_vocab):
 
     assert cat1 == cat2
 
+
 def test_lexeme_neq(en_vocab):
     '''Inequality of lexemes'''
     cat = en_vocab['cat']
@@ -20,6 +21,7 @@ def test_lexeme_neq(en_vocab):
     dog = en_vocab['dog']
 
     assert cat != dog
+
 
 def test_lexeme_lt(en_vocab):
     '''More frequent is l.t. less frequent'''
