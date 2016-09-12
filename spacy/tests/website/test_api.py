@@ -19,13 +19,13 @@ def test_example_war_and_peace(nlp):
 def test_main_entry_point(nlp):
     # from spacy.en import English
     # nlp = English()
-    doc = nlp('Some text.') # Applies tagger, parser, entity
-    doc = nlp('Some text.', parse=False) # Applies tagger and entity, not parser
-    doc = nlp('Some text.', entity=False) # Applies tagger and parser, not entity
-    doc = nlp('Some text.', tag=False) # Does not apply tagger, entity or parser
-    doc = nlp('') # Zero-length tokens, not an error
+    doc = nlp('Some text.')  # Applies tagger, parser, entity
+    doc = nlp('Some text.', parse=False)  # Applies tagger and entity, not parser
+    doc = nlp('Some text.', entity=False)  # Applies tagger and parser, not entity
+    doc = nlp('Some text.', tag=False)  # Does not apply tagger, entity or parser
+    doc = nlp('')  # Zero-length tokens, not an error
     # doc = nlp(b'Some text') <-- Error: need unicode
-    doc = nlp(b'Some text'.decode('utf8')) # Encode to unicode first.
+    doc = nlp(b'Some text'.decode('utf8'))  # Encode to unicode first.
 
 
 @pytest.mark.models

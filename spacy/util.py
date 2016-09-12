@@ -139,7 +139,7 @@ def read_infix(fileobj):
 #     return entries
 
 
-def align_tokens(ref, indices): # Deprecated, surely?
+def align_tokens(ref, indices):  # Deprecated, surely?
     start = 0
     queue = list(indices)
     for token in ref:
@@ -152,7 +152,7 @@ def align_tokens(ref, indices): # Deprecated, surely?
     assert not queue
 
 
-def detokenize(token_rules, words): # Deprecated?
+def detokenize(token_rules, words):  # Deprecated?
     """To align with treebanks, return a list of "chunks", where a chunk is a
     sequence of tokens that are separated by whitespace in actual strings. Each
     chunk should be a tuple of token indices, e.g.

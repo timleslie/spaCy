@@ -202,7 +202,7 @@ class Language(object):
 
     def __reduce__(self):
         args = (
-            None, # data_dir
+            None,  # data_dir
             self.vocab,
             self.tokenizer,
             self.tagger,
