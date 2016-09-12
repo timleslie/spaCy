@@ -56,7 +56,7 @@ def test_round_trip():
     codec = HuffmanCodec(freqs.items())
 
     message = ['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the',
-                'the', 'lazy', 'dog', '.']
+               'the', 'lazy', 'dog', '.']
     strings = list(codec.strings)
     codes = dict([(codec.leaves[i], strings[i]) for i in range(len(codec.leaves))])
     bits = codec.encode(message)
