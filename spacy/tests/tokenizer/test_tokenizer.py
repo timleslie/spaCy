@@ -160,7 +160,7 @@ def test_em_dash_infix(en_tokenizer):
     assert tokens[7].text == '?'
     assert tokens[8].text == '\u2014'
 
-#def test_cnts7():
-#    text = 'But then the 6,000-year ice age came...'
-#    tokens = EN.tokenize(text)
-#    assert len(tokens) == 10
+# def test_cnts7():
+#     text = 'But then the 6,000-year ice age came...'
+#     tokens = EN.tokenize(text)
+#     assert len(tokens) == 10

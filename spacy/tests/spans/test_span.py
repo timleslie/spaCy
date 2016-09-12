@@ -41,7 +41,7 @@ def test_root2():
 
 def test_sent(doc):
     '''Test new span.sent property'''
-    #return EN('This is a sentence. This is another sentence. And a third.')
+    # return EN('This is a sentence. This is another sentence. And a third.')
     heads = np.asarray([[1, 0, -1, -1, -1, 1, 0, -1, -1, -1, 2, 1, 0, -1]], dtype='int32')
     doc.from_array([HEAD], heads.T)
     assert len(list(doc.sents))

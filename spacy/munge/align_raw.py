@@ -229,8 +229,8 @@ def may_mkdir(parent, *subdirs):
 def main(odc_dir, onto_dir, out_dir):
     may_mkdir(out_dir, 'wsj', 'align')
     may_mkdir(out_dir, 'web', 'align')
-    #do_wsj(odc_dir, path.join(ontonotes_dir, 'wsj', 'orig'),
-    #       path.join(out_dir, 'wsj', 'align'))
+    # do_wsj(odc_dir, path.join(ontonotes_dir, 'wsj', 'orig'),
+    #        path.join(out_dir, 'wsj', 'align'))
     do_web(
         path.join(onto_dir, 'data', 'english', 'metadata', 'context', 'wb', 'sel'),
         path.join(onto_dir, 'data', 'english', 'annotations', 'wb'),
