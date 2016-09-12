@@ -12,8 +12,8 @@ from spacy.vocab import Vocab
 def matcher(EN):
     patterns = {
         'Javascript': ['PRODUCT', {}, [[{'ORTH': 'JavaScript'}]]],
-        'GoogleNow':  ['PRODUCT', {}, [[{'ORTH': 'Google'}, {'ORTH': 'Now'}]]],
-        'Java':       ['PRODUCT', {}, [[{'LOWER': 'java'}]]],
+        'GoogleNow': ['PRODUCT', {}, [[{'ORTH': 'Google'}, {'ORTH': 'Now'}]]],
+        'Java': ['PRODUCT', {}, [[{'LOWER': 'java'}]]],
     }
     return Matcher(EN.vocab, patterns)
 

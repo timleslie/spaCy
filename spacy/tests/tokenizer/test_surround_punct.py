@@ -4,7 +4,7 @@ import pytest
 
 @pytest.fixture
 def paired_puncts():
-    return [('(', ')'),  ('[', ']'), ('{', '}'), ('*', '*')]
+    return [('(', ')'), ('[', ']'), ('{', '}'), ('*', '*')]
 
 
 def test_token(paired_puncts, en_tokenizer):
