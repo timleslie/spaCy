@@ -25,7 +25,7 @@ import pytest
 #     base_nps = list(sent.noun_chunks)
 #     assert len(base_nps) == 2
 #     assert base_nps[0].string == 'A phrase '
-#     assert base_nps[1].string == 'another phrase ' 
+#     assert base_nps[1].string == 'another phrase '
 
 
 @pytest.mark.models
