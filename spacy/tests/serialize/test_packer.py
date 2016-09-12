@@ -31,7 +31,7 @@ def vocab():
     vocab = English.default_vocab(package=package)
     lex = vocab['dog']
     assert vocab[vocab.strings['dog']].orth_ == 'dog'
-    lex  = vocab['the']
+    lex = vocab['the']
     lex = vocab['quick']
     lex = vocab['jumped']
     return vocab
