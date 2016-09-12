@@ -8,9 +8,8 @@ from spacy.en import English
 
 @pytest.fixture
 def morph_exc():
-    return {
-            'PRP$': {'his': {'L': '-PRP-', 'person': 3, 'case': 2}},
-           }
+    return {'PRP$': {'his': {'L': '-PRP-', 'person': 3, 'case': 2}},
+            }
 
 
 @pytest.mark.models
